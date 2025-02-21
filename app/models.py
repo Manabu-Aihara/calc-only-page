@@ -11,7 +11,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash
 
-from .database_async import Base
+from .database_base import Base
 
 
 class User(Base):
@@ -48,17 +48,46 @@ class User(Base):
     login = relationship("StaffLogin", backref="user")
     job_contract = relationship("StaffJobContract", backref="user")
     holiday_contract = relationship("StaffHolidayContract", backref="user")
-    CountTotalling = relationship("TableOfCount", backref="user")
+    paid_holiday = relationship("RecordPaidHoliday", backref="user")
+    count_totalling = relationship("TableOfCount", backref="user")
 
     def __init__(self, STAFFID):
         self.STAFFID = STAFFID
 
 
-class StaffJobConstract(Base):
+class CollateralTemplate(Base):
+    __tablename__ = "M_TIMECARD_TEMPLATE"
+    JOBTYPE_CODE = Column(Integer, primary_key=True, index=True, nullable=False)
+    CONTRACT_CODE = Column(Integer, primary_key=True, index=True, nullable=False)
+    TEMPLATE_NO = Column(Integer, index=True, nullable=False)
+
+    """
+    sqlalchemy.exc.AmbiguousForeignKeysError:
+    Could not determine join condition between parent/child tables on relationship ...
+    - there are multiple foreign key paths linking the tables.
+    Specify the 'foreign_keys' argument, providing a list of those columns 
+    which should be counted as containing a foreign key reference to the parent table.
+    """
+    # job_history = db.relationship("D_JOB_HISTORY")
+    # https://stackoverflow.com/questions/75756897/reference-a-relationship-with-multiple-foreign-keys-in-sqlalchemy
+    # job_history = db.relationship(
+    #     "D_JOB_HISTORY",
+    #     # foreign_keys="[D_JOB_HISTORY.JOBTYPE_CODE, D_JOB_HISTORY.CONTRACT_CODE]",
+    #     back_populates="timecard_template",
+    # )
+
+    def __init__(self, JOBTYPE_CODE, CONTRACT_CODE, TEMPLATE_NO):
+        self.JOBTYPE_CODE = JOBTYPE_CODE
+        self.CONTRACT_CODE = CONTRACT_CODE
+        self.TEMPLATE_NO = TEMPLATE_NO
+
+
+class StaffJobContract(Base):
     __tablename__ = "D_JOB_HISTORY"
+    # job_contract = relationship("User", backref="user")
     STAFFID = Column(
         Integer,
-        ForeignKey("user.STAFFID"),
+        ForeignKey("M_STAFFINFO.STAFFID"),
         primary_key=True,
         index=True,
         nullable=False,
@@ -105,9 +134,10 @@ class StaffJobConstract(Base):
 
 class StaffHolidayContract(Base):
     __tablename__ = "D_HOLIDAY_HISTORY"
+    # holiday_contract = relationship("User", backref="user")
     STAFFID = Column(
         Integer,
-        ForeignKey("user.STAFFID"),
+        ForeignKey("M_STAFFINFO.STAFFID"),
         primary_key=True,
         index=True,
         nullable=False,
@@ -176,15 +206,16 @@ class Post(Base):
 class StaffLogin(Base):
     __tablename__ = "M_LOGGININFO"
     id = Column(Integer, primary_key=True)
+    # login = relationship("User", backref="user")
     STAFFID = Column(
         Integer,
-        ForeignKey("user.STAFFID"),
+        ForeignKey("M_STAFFINFO.STAFFID"),
         unique=True,
         index=True,
         nullable=False,
     )
     PASSWORD_HASH = Column(String(128), index=True, nullable=True)
-    ADMIN = Column(Boolean(), index=True, nullable=True)
+    ADMIN = Column(Boolean, index=True, nullable=True)
     attendance = relationship("Attendance", backref="login_user")
 
     def __init__(self, STAFFID, PASSWORD, ADMIN):
@@ -196,7 +227,7 @@ class StaffLogin(Base):
 class Attendance(Base):
     __tablename__ = "M_ATTENDANCE"
     id = Column(Integer, primary_key=True)
-    STAFFID = Column(Integer, ForeignKey("login_user.STAFFID"), index=True)
+    STAFFID = Column(Integer, ForeignKey("M_LOGGININFO.STAFFID"), index=True)
     WORKDAY = Column(Date, index=True, nullable=True)
     HOLIDAY = Column(String(32), index=True, nullable=True)
     STARTTIME = Column(String(32), index=True, nullable=True)  # 出勤時間
@@ -248,7 +279,7 @@ class RecordPaidHoliday(Base):  # 年休関連
     __tablename__ = "M_RECORD_PAIDHOLIDAY"
     STAFFID = Column(
         Integer,
-        ForeignKey("user.STAFFID"),
+        ForeignKey("M_STAFFINFO.STAFFID"),
         primary_key=True,
         index=True,
         nullable=False,
@@ -274,9 +305,10 @@ class RecordPaidHoliday(Base):  # 年休関連
 class TableOfCount(Base):
     __tablename__ = "M_TABLE_OF_COUNTER"
     id = Column(String(10), primary_key=True)
+    # count_totalling = relationship("User", backref="user")
     STAFFID = Column(
         Integer,
-        ForeignKey("user.STAFFID"),
+        ForeignKey("M_STAFFINFO.STAFFID"),
         index=True,
         nullable=False,
     )

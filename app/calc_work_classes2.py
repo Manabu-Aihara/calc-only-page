@@ -3,12 +3,12 @@ from dataclasses import dataclass, field, InitVar
 from functools import lru_cache
 from datetime import datetime, timedelta, time
 
-from .select_only_sync import session
+from .database_base import session
 from .models import (
     User,
     Contract,
     RecordPaidHoliday,
-    StaffJobConstract,
+    StaffJobContract,
     StaffHolidayContract,
 )
 
@@ -52,9 +52,9 @@ class ContractTimeClass:
 
         # 最新の契約労働・休暇を1回のクエリで取得
         part_contract_work = (
-            session.query(StaffJobConstract)
-            .filter(StaffJobConstract.STAFFID == staff_id)
-            .order_by(StaffJobConstract.START_DAY.desc())
+            session.query(StaffJobContract)
+            .filter(StaffJobContract.STAFFID == staff_id)
+            .order_by(StaffJobContract.START_DAY.desc())
             .first()
         )
         part_contract_holiday = (

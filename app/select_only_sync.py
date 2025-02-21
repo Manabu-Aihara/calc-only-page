@@ -4,7 +4,7 @@ from typing import Optional, List
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from app.models import TableOfCount
+from .models import TableOfCount
 
 
 def get_panda_url(sql_async_module: str = "asyncmy"):
