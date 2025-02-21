@@ -4,7 +4,7 @@ from decimal import Decimal, ROUND_HALF_UP
 import pandas as pd
 from pandas import Series
 
-from app.calc_work_classes2 import CalcTimeFactory, output_rest_time
+from .calc_work_classes2 import CalcTimeFactory, output_rest_time
 
 
 def calc_attendance_of_month(query_all) -> Series:

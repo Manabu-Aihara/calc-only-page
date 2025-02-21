@@ -68,9 +68,9 @@ class CollateralTemplate(Base):
     Specify the 'foreign_keys' argument, providing a list of those columns 
     which should be counted as containing a foreign key reference to the parent table.
     """
-    # job_history = db.relationship("D_JOB_HISTORY")
+    # job_history = relationship("D_JOB_HISTORY")
     # https://stackoverflow.com/questions/75756897/reference-a-relationship-with-multiple-foreign-keys-in-sqlalchemy
-    # job_history = db.relationship(
+    # job_history = relationship(
     #     "D_JOB_HISTORY",
     #     # foreign_keys="[D_JOB_HISTORY.JOBTYPE_CODE, D_JOB_HISTORY.CONTRACT_CODE]",
     #     back_populates="timecard_template",
@@ -82,9 +82,41 @@ class CollateralTemplate(Base):
         self.TEMPLATE_NO = TEMPLATE_NO
 
 
+# class StaffJobContract(Base):
+#     __tablename__ = "D_JOB_HISTORY"
+#     STAFFID = Column(
+#         Integer,
+#         ForeignKey("M_STAFFINFO.STAFFID"),
+#         primary_key=True,
+#         index=True,
+#         nullable=False,
+#     )
+#     JOBTYPE_CODE = Column(Integer, index=True, nullable=False)
+#     CONTRACT_CODE = Column(Integer, index=True, nullable=False)
+#     PART_WORKTIME = Column(Integer, index=True, nullable=False)
+#     START_DAY = Column(Date, primary_key=True, index=True, nullable=True)
+#     END_DAY = Column(Date, index=True, nullable=True)
+
+#     def __init__(
+#         self, STAFFID, JOBTYPE_CODE, CONTRACT_CODE, PART_WORKTIME, START_DAY, END_DAY
+#     ):
+#         self.STAFFID = STAFFID
+#         self.JOBTYPE_CODE = JOBTYPE_CODE
+#         self.CONTRACT_CODE = CONTRACT_CODE
+#         self.PART_WORKTIME = PART_WORKTIME
+#         self.START_DAY = START_DAY
+#         self.END_DAY = END_DAY
+# print("")
+
+
 class StaffJobContract(Base):
     __tablename__ = "D_JOB_HISTORY"
-    # job_contract = relationship("User", backref="user")
+    # __table_args__ = (
+    #     ForeignKeyConstraint(
+    #         ["JOBTYPE_CODE", "CONTRACT_CODE"],
+    #         ["M_TIMECARD_TEMPLATE.JOBTYPE_CODE", "M_TIMECARD_TEMPLATE.CONTRACT_CODE"],
+    #     ),
+    # )
     STAFFID = Column(
         Integer,
         ForeignKey("M_STAFFINFO.STAFFID"),
@@ -92,34 +124,42 @@ class StaffJobContract(Base):
         index=True,
         nullable=False,
     )
-    # JOBTYPE_CODE = Column(
-    #     Integer,
-    #     ForeignKey("M_TIMECARD_TEMPLATE.JOBTYPE_CODE"),
-    #     index=True,
-    #     nullable=False,
-    # )
-    # CONTRACT_CODE = Column(
-    #     Integer,
-    #     ForeignKey("M_TIMECARD_TEMPLATE.CONTRACT_CODE"),
-    #     index=True,
-    #     nullable=False,
-    # )
-    JOBTYPE_CODE = Column(Integer, index=True, nullable=False)
-    CONTRACT_CODE = Column(Integer, index=True, nullable=False)
+    JOBTYPE_CODE = Column(
+        Integer,
+        ForeignKey("M_TIMECARD_TEMPLATE.JOBTYPE_CODE"),
+        index=True,
+        nullable=False,
+    )
+    CONTRACT_CODE = Column(
+        Integer,
+        ForeignKey("M_TIMECARD_TEMPLATE.CONTRACT_CODE"),
+        index=True,
+        nullable=False,
+    )
+    # JOBTYPE_CODE = Column(Integer, index=True, nullable=False)
+    # CONTRACT_CODE = Column(Integer, index=True, nullable=False)
     """
     2024/8/15 リレーション機能追加
     SQLAlchemy multiple foreign keys in one mapped class to the same primary key
     https://stackoverflow.com/questions/22355890/sqlalchemy-multiple-foreign-keys-in-one-mapped-class-to-the-same-primary-key
     """
-    # jobtype = relationship(
-    #     "M_TIMECARD_TEMPLATE", foreign_keys=[JOBTYPE_CODE], uselist=True
-    # )
-    # constract = relationship(
-    #     "M_TIMECARD_TEMPLATE", foreign_keys=[CONTRACT_CODE], uselist=True
-    # )
+    jobtype = relationship(
+        "CollateralTemplate", foreign_keys=[JOBTYPE_CODE], uselist=True
+    )
+    constract = relationship(
+        "CollateralTemplate", foreign_keys=[CONTRACT_CODE], uselist=True
+    )
+
     PART_WORKTIME = Column(Float, index=True, nullable=False)
     START_DAY = Column(Date, primary_key=True, index=True, nullable=True)
     END_DAY = Column(Date, index=True, nullable=True)
+
+    # timecard_template = relationship(
+    #     "M_TIMECARD_TEMPLATE",
+    #     # foreign_keys="[M_TIMECARD_TEMPLATE.JOBTYPE_CODE, M_TIMECARD_TEMPLATE.CONTRACT_CODE]",
+    #     back_populates="job_history",
+    #     uselist=True,
+    # )
 
     def __init__(
         self, STAFFID, JOBTYPE_CODE, CONTRACT_CODE, PART_WORKTIME, START_DAY, END_DAY
@@ -134,7 +174,6 @@ class StaffJobContract(Base):
 
 class StaffHolidayContract(Base):
     __tablename__ = "D_HOLIDAY_HISTORY"
-    # holiday_contract = relationship("User", backref="user")
     STAFFID = Column(
         Integer,
         ForeignKey("M_STAFFINFO.STAFFID"),
