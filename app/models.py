@@ -49,7 +49,7 @@ class User(Base):
     job_contract = relationship("StaffJobContract", backref="user")
     holiday_contract = relationship("StaffHolidayContract", backref="user")
     paid_holiday = relationship("RecordPaidHoliday", backref="user")
-    count_totalling = relationship("TableOfCount", backref="user")
+    # count_totalling = relationship("TableOfCount", backref="user")
 
     def __init__(self, STAFFID):
         self.STAFFID = STAFFID
@@ -343,11 +343,11 @@ class RecordPaidHoliday(Base):  # 年休関連
 
 class TableOfCount(Base):
     __tablename__ = "M_TABLE_OF_COUNTER"
-    id = Column(String(10), primary_key=True)
+    id = Column(String(15), primary_key=True)
     # count_totalling = relationship("User", backref="user")
     STAFFID = Column(
         Integer,
-        ForeignKey("M_STAFFINFO.STAFFID"),
+        # ForeignKey("M_STAFFINFO.STAFFID"),
         index=True,
         nullable=False,
     )

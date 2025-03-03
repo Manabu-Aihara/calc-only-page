@@ -5,9 +5,12 @@ import pandas as pd
 from pandas import Series
 
 from .calc_work_classes2 import CalcTimeFactory, output_rest_time
+from .attendance_query_class import AttendanceQuery
 
 
-def calc_attendance_of_month(query_all) -> Series:
+def calc_attendance_of_month(one_person_queries) -> Series:
+    # def calc_attendance_of_month(attendance_query: AttendanceQuery) -> Series:
+    ref_staff: int = None
 
     pds = pd.Series
     calc_time_factory = CalcTimeFactory()
@@ -65,7 +68,10 @@ def calc_attendance_of_month(query_all) -> Series:
     # 【項目29】中抜け
     halfway_through: int = 0
 
-    for month_attend, contract_code in query_all:
+    for month_attend, contract_code in one_person_queries:
+        current_staff = month_attend.STAFFID
+        print(f"Current: {current_staff}")
+
         on_call_holiday_cnt += (
             1
             if month_attend.ONCALL != "0" and month_attend.WORKDAY.weekday() in [5, 6]
@@ -172,11 +178,11 @@ def calc_attendance_of_month(query_all) -> Series:
             nurse_holiday_append(nurse_holiday_work_time)
 
         print(f"{month_attend.WORKDAY.day} 日")
-        print(f"Real time: {calc_real_time}")
-        print(f"Actual time: {actual_work_time}")
-        print(f"Real time list: {real_work_times}")
-        print(f"Over time list: {over_times}")
-        print(f"Nurse holiday: {nurse_holiday_works}")
+        # print(f"Real time: {calc_real_time}")
+        # print(f"Actual time: {actual_work_time}")
+        # print(f"Real time list: {real_work_times}")
+        # print(f"Over time list: {over_times}")
+        # print(f"Nurse holiday: {nurse_holiday_works}")
 
         # ここで宣言された変数は“+=”不可
         # work_time_sum_60: float = 0.0

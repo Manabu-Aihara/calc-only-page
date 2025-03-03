@@ -1,5 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field, InitVar
 from datetime import date
+from typing import Dict
 
 from .database_base import session
 from .models import (
@@ -14,10 +15,18 @@ class AttendanceQuery:
     staff_id: int
     filter_from_day: date
     filter_to_day: date
+    # staff_id: InitVar[int]
 
-    # sub_query: T = None
-    # def __init__(self, staff_id: str, sub_query: T) -> None:
+    # def set_data(
+    #     self,
+    #     staff_id: int,
+    #     filter_from_day: date,
+    #     filter_to_day: date,
+    # ):
     #     self.staff_id = staff_id
+    #     self.filter_from_day = filter_from_day
+    #     self.filter_to_day = filter_to_day
+
     def _get_filter(self) -> list:
         attendance_filters = []
         attendance_filters.append(Attendance.STAFFID == self.staff_id)
@@ -33,9 +42,6 @@ class AttendanceQuery:
         attendance_filters.append(Attendance.STAFFID == StaffJobContract.STAFFID)
         attendance_filters.append(StaffJobContract.START_DAY <= Attendance.WORKDAY)
         attendance_filters.append(StaffJobContract.END_DAY >= Attendance.WORKDAY)
-        # print(f"Flag state: {part_timer_flag}")
-        # if part_timer_flag is False:
-        #     print("Passing filter")
         (
             attendance_filters.append(StaffJobContract.CONTRACT_CODE != 2)
             if part_timer_flag is False
@@ -80,3 +86,13 @@ class AttendanceQuery:
             .join(StaffJobContract, StaffJobContract.STAFFID == Attendance.STAFFID)
             # .order_by(Attendance.STAFFID, Attendance.WORKDAY)
         )
+
+
+@dataclass
+class QueryAttendFactory:
+    _instances: Dict[int, "AttendanceQuery"] = field(default_factory=dict)
+
+    def get_instance(self, staff_id: int) -> "AttendanceQuery":
+        if staff_id not in self._instances:
+            self._instances[staff_id] = AttendanceQuery(staff_id)
+        return self._instances[staff_id]

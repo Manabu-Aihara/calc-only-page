@@ -8,8 +8,8 @@ from app.attendance_calc_lib import calc_attendance_of_month
 
 @pytest.fixture(name="aq")
 def setup_attendance_query():
-    from_day = date(2024, 10, 1)
-    to_day = date(2024, 10, 31)
+    from_day = date(2024, 12, 1)
+    to_day = date(2024, 12, 31)
     attendance_query_obj = AttendanceQuery(
         201, filter_from_day=from_day, filter_to_day=to_day
     )
