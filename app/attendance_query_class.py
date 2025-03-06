@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field, InitVar
-from datetime import date
 from typing import Dict
+from datetime import date
 
 from .database_base import session
 from .models import (
@@ -15,36 +15,39 @@ class AttendanceQuery:
     staff_id: int
     filter_from_day: date
     filter_to_day: date
+    part_time_flag: bool
     # staff_id: InitVar[int]
 
-    # def set_data(
-    #     self,
-    #     staff_id: int,
-    #     filter_from_day: date,
-    #     filter_to_day: date,
-    # ):
-    #     self.staff_id = staff_id
-    #     self.filter_from_day = filter_from_day
-    #     self.filter_to_day = filter_to_day
+    def __post_init__(self, staff_id: int):
+        self.staff_id = staff_id
+
+    def set_data(
+        self, filter_from_day: date, filter_to_day: date, part_time_flag: bool
+    ):
+        self.filter_from_day = filter_from_day
+        self.filter_to_day = filter_to_day
+        self.part_time_flag = part_time_flag
 
     def _get_filter(self) -> list:
         attendance_filters = []
         attendance_filters.append(Attendance.STAFFID == self.staff_id)
+        # pymysql.err.OperationalError: (1241, 'Operand should contain 1 column(s)')対策も、
+        # ファクトリーにしているため、単体のインスタンスで値が合算される
+        # attendance_filters.append(Attendance.STAFFID.in_(self.staff_id))
         attendance_filters.append(
             Attendance.WORKDAY.between(self.filter_from_day, self.filter_to_day)
         )
         attendance_filters.append(Attendance.STAFFID == User.STAFFID)
         return attendance_filters
 
-    @staticmethod
-    def _get_job_filter(part_timer_flag: bool = False):
+    def _get_job_filter(self):
         attendance_filters = []
         attendance_filters.append(Attendance.STAFFID == StaffJobContract.STAFFID)
         attendance_filters.append(StaffJobContract.START_DAY <= Attendance.WORKDAY)
         attendance_filters.append(StaffJobContract.END_DAY >= Attendance.WORKDAY)
         (
             attendance_filters.append(StaffJobContract.CONTRACT_CODE != 2)
-            if part_timer_flag is False
+            if self.part_time_flag is False
             else attendance_filters.append(StaffJobContract.CONTRACT_CODE == 2)
         )
         return attendance_filters
@@ -66,8 +69,8 @@ class AttendanceQuery:
         return wrapper
 
     @db_error_handler
-    def get_clerical_attendance(self, part_timer_flag: bool):
-        clerk_filters = self._get_filter() + self._get_job_filter(part_timer_flag)
+    def get_clerical_attendance(self):
+        clerk_filters = self._get_filter() + self._get_job_filter()
 
         # sub_clerk_query = self._get_sub_clerk_query()
         return (
@@ -84,15 +87,24 @@ class AttendanceQuery:
             session.query(Attendance, StaffJobContract.CONTRACT_CODE)
             .filter(*clerk_filters)
             .join(StaffJobContract, StaffJobContract.STAFFID == Attendance.STAFFID)
-            # .order_by(Attendance.STAFFID, Attendance.WORKDAY)
+            .order_by(Attendance.STAFFID, Attendance.WORKDAY)
         )
 
 
 @dataclass
 class QueryAttendFactory:
+    filter_from_day: date
+    filter_to_day: date
+    part_time_flag: bool
+
     _instances: Dict[int, "AttendanceQuery"] = field(default_factory=dict)
 
     def get_instance(self, staff_id: int) -> "AttendanceQuery":
         if staff_id not in self._instances:
-            self._instances[staff_id] = AttendanceQuery(staff_id)
+            self._instances[staff_id] = AttendanceQuery(
+                self.filter_from_day,
+                self.filter_to_day,
+                self.part_time_flag,
+                staff_id=staff_id,
+            )
         return self._instances[staff_id]

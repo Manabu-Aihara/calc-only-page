@@ -8,9 +8,10 @@ from .calc_work_classes2 import CalcTimeFactory, output_rest_time
 from .attendance_query_class import AttendanceQuery
 
 
-def calc_attendance_of_month(one_person_queries) -> Series:
-    # def calc_attendance_of_month(attendance_query: AttendanceQuery) -> Series:
-    ref_staff: int = None
+def calc_attendance_of_term(attendance_query: AttendanceQuery) -> Series:
+    # def calc_attendance_of_term(
+    #     self, from_day: date, to_day: date, part_flag: bool
+    # ) -> Series:
 
     pds = pd.Series
     calc_time_factory = CalcTimeFactory()
@@ -68,70 +69,76 @@ def calc_attendance_of_month(one_person_queries) -> Series:
     # 【項目29】中抜け
     halfway_through: int = 0
 
-    for month_attend, contract_code in one_person_queries:
-        current_staff = month_attend.STAFFID
-        print(f"Current: {current_staff}")
+    for (
+        one_person_attendance,
+        contract_code,
+    ) in attendance_query.get_clerical_attendance():
 
         on_call_holiday_cnt += (
             1
-            if month_attend.ONCALL != "0" and month_attend.WORKDAY.weekday() in [5, 6]
+            if one_person_attendance.ONCALL != "0"
+            and one_person_attendance.WORKDAY.weekday() in [5, 6]
             else 0
         )
         on_call_cnt += (
             1
-            if month_attend.ONCALL != "0"
-            and month_attend.WORKDAY.weekday() not in [5, 6]
+            if one_person_attendance.ONCALL != "0"
+            and one_person_attendance.WORKDAY.weekday() not in [5, 6]
             else 0
         )
         on_call_correspond_cnt += (
-            int(month_attend.ONCALL_COUNT)
-            if not isinstance(month_attend.ONCALL_COUNT, type(None))
-            and month_attend.ONCALL_COUNT != ""
-            and month_attend.ONCALL_COUNT != "0"
+            int(one_person_attendance.ONCALL_COUNT)
+            if not isinstance(one_person_attendance.ONCALL_COUNT, type(None))
+            and one_person_attendance.ONCALL_COUNT != ""
+            and one_person_attendance.ONCALL_COUNT != "0"
             else 0
         )
         engel_correspond_cnt += (
-            int(month_attend.ENGEL_COUNT)
-            if not isinstance(month_attend.ENGEL_COUNT, type(None))
-            and month_attend.ENGEL_COUNT != ""
-            and month_attend.ENGEL_COUNT != "0"
+            int(one_person_attendance.ENGEL_COUNT)
+            if not isinstance(one_person_attendance.ENGEL_COUNT, type(None))
+            and one_person_attendance.ENGEL_COUNT != ""
+            and one_person_attendance.ENGEL_COUNT != "0"
             else 0
         )
         distance_sum += (
-            float(month_attend.MILEAGE)
-            if not isinstance(month_attend.MILEAGE, type(None))
-            and month_attend.MILEAGE != ""
-            and month_attend.MILEAGE != "0.0"
+            float(one_person_attendance.MILEAGE)
+            if not isinstance(one_person_attendance.MILEAGE, type(None))
+            and one_person_attendance.MILEAGE != ""
+            and one_person_attendance.MILEAGE != "0.0"
             else 0
         )
         # print(
         #     f"Inner Count log: {on_call_cnt} {on_call_cnt_cnt} {on_call_holiday_cnt} {engel_int_cnt}"
         # )
 
-        holiday_cnt += 1 if month_attend.NOTIFICATION == "3" else 0
+        holiday_cnt += 1 if one_person_attendance.NOTIFICATION == "3" else 0
         half_holiday_cnt += (
             1
-            if month_attend.NOTIFICATION == "4" or month_attend.NOTIFICATION2 == "4"
+            if one_person_attendance.NOTIFICATION == "4"
+            or one_person_attendance.NOTIFICATION2 == "4"
             else 0
         )
         late_cnt += (
             1
-            if month_attend.NOTIFICATION == "1" or month_attend.NOTIFICATION2 == "1"
+            if one_person_attendance.NOTIFICATION == "1"
+            or one_person_attendance.NOTIFICATION2 == "1"
             else 0
         )
         leave_early_cnt += (
             1
-            if month_attend.NOTIFICATION == "2" or month_attend.NOTIFICATION2 == "2"
+            if one_person_attendance.NOTIFICATION == "2"
+            or one_person_attendance.NOTIFICATION2 == "2"
             else 0
         )
-        absence_cnt += 1 if month_attend.NOTIFICATION in n_absence_list else 0
-        trip_cnt += 1 if month_attend.NOTIFICATION == "5" else 0
+        absence_cnt += 1 if one_person_attendance.NOTIFICATION in n_absence_list else 0
+        trip_cnt += 1 if one_person_attendance.NOTIFICATION == "5" else 0
         half_trip_cnt += (
             1
-            if month_attend.NOTIFICATION == "6" or month_attend.NOTIFICATION2 == "6"
+            if one_person_attendance.NOTIFICATION == "6"
+            or one_person_attendance.NOTIFICATION2 == "6"
             else 0
         )
-        reflesh_cnt += 1 if month_attend.NOTIFICATION == "7" else 0
+        reflesh_cnt += 1 if one_person_attendance.NOTIFICATION == "7" else 0
         # print(
         #     f"Inner Count log: {holiday_cnt} {half_holiday_cnt} {late_cnt} {leave_early_cnt} {absence_cnt} {trip_cnt} {half_trip_cnt}"
         # )
@@ -139,45 +146,48 @@ def calc_attendance_of_month(one_person_queries) -> Series:
         real_time_sum_append = real_work_times.append
         over_time_append = over_times.append
         nurse_holiday_append = nurse_holiday_works.append
-        # setting_time.staff_id = month_attend.STAFFID
-        # setting_time.sh_starttime = month_attend.STARTTIME
-        # setting_time.sh_endtime = month_attend.ENDTIME
+        # setting_time.staff_id = one_person_attendance.STAFFID
+        # setting_time.sh_starttime = one_person_attendance.STARTTIME
+        # setting_time.sh_endtime = one_person_attendance.ENDTIME
         # setting_time.notifications = (
-        #     month_attend.NOTIFICATION,
-        #     month_attend.NOTIFICATION2,
+        #     one_person_attendance.NOTIFICATION,
+        #     one_person_attendance.NOTIFICATION2,
         # )
-        # setting_time.sh_overtime = month_attend.OVERTIME
-        # setting_time.sh_holiday = month_attend.HOLIDAY
-        setting_time = calc_time_factory.get_instance(month_attend.STAFFID)
+        # setting_time.sh_overtime = one_person_attendance.OVERTIME
+        # setting_time.sh_holiday = one_person_attendance.HOLIDAY
+        setting_time = calc_time_factory.get_instance(one_person_attendance.STAFFID)
         setting_time.set_data(
-            month_attend.STARTTIME,
-            month_attend.ENDTIME,
-            (month_attend.NOTIFICATION, month_attend.NOTIFICATION2),
-            month_attend.OVERTIME,
-            month_attend.HOLIDAY,
+            one_person_attendance.STARTTIME,
+            one_person_attendance.ENDTIME,
+            (
+                one_person_attendance.NOTIFICATION,
+                one_person_attendance.NOTIFICATION2,
+            ),
+            one_person_attendance.OVERTIME,
+            one_person_attendance.HOLIDAY,
         )
 
-        print(f"ID: {month_attend.STAFFID}")
+        print(f"ID: {one_person_attendance.STAFFID}")
         actual_work_time = setting_time.get_actual_work_time()
         calc_real_time = setting_time.get_real_time()
         over_time = setting_time.get_over_time()
         nurse_holiday_work_time = setting_time.calc_nurse_holiday_work()
         # except TypeError as e:
-        #     msg = f"{e}: {month_attend.STAFFID}"
+        #     msg = f"{e}: {one_person_attendance.STAFFID}"
         #     return render_template(
         #         "error/403.html", title="Exception message", message=msg
         #     )
         # else:
         # real_time_sum.append(calc_real_time)
         real_time_sum_append(calc_real_time)
-        if month_attend.OVERTIME == "1" and contract_code != 2:
+        if one_person_attendance.OVERTIME == "1" and contract_code != 2:
             # over_time_0.append(over_time)
             over_time_append(over_time)
         if nurse_holiday_work_time != 9.99:
             # syukkin_holiday_times_0.append(nurse_holiday_work_time)
             nurse_holiday_append(nurse_holiday_work_time)
 
-        print(f"{month_attend.WORKDAY.day} 日")
+        print(f"{one_person_attendance.WORKDAY.day} 日")
         # print(f"Real time: {calc_real_time}")
         # print(f"Actual time: {actual_work_time}")
         # print(f"Real time list: {real_work_times}")
@@ -186,7 +196,7 @@ def calc_attendance_of_month(one_person_queries) -> Series:
 
         # ここで宣言された変数は“+=”不可
         # work_time_sum_60: float = 0.0
-        # 🙅 work_time_sum_60 += AttendanceDada[month_attend.WORKDAY.day][14]
+        # 🙅 work_time_sum_60 += AttendanceDada[one_person_attendance.WORKDAY.day][14]
 
         actual_second = actual_work_time.total_seconds()
         workday_count += 1 if actual_second != 0.0 else 0
@@ -200,17 +210,20 @@ def calc_attendance_of_month(one_person_queries) -> Series:
 
         w_h = actual_time_sum // (60 * 60)
         w_m = (actual_time_sum - w_h * 60 * 60) // 60
+        # 【項目11】
         actual_time60 = w_h + w_m / 100
 
         real_sum: int = sum(real_work_times)
         w_h = real_sum // (60 * 60)
         w_m = (real_sum - w_h * 60 * 60) // 60
+        # 【項目13】
         real_time = w_h + w_m / 100
         # real_time_10 = real_sum / (60 * 60)
 
         over_sum: int = sum(over_times)
         o_h = over_sum // (60 * 60)
         o_m = (over_sum - o_h * 60 * 60) // 60
+        # 【項目17】
         over60 = o_h + o_m / 100
 
         over10 = over_sum / (60 * 60)
@@ -220,6 +233,7 @@ def calc_attendance_of_month(one_person_queries) -> Series:
         sum_nrs: int = sum(nurse_holiday_works)
         h_h = sum_nrs // (60 * 60)
         h_m = (sum_nrs - h_h * 60 * 60) // 60
+        # 【項目22】
         holiday_work60 = h_h + h_m / 100
 
         holiday_work_10 = sum_nrs / (60 * 60)
@@ -229,7 +243,7 @@ def calc_attendance_of_month(one_person_queries) -> Series:
         )
 
         sum_dict: Dict[str, int] = output_rest_time(
-            month_attend.NOTIFICATION, month_attend.NOTIFICATION2
+            one_person_attendance.NOTIFICATION, one_person_attendance.NOTIFICATION2
         )
         timeoff += sum_dict.get("Off")
         halfway_through += sum_dict.get("Through")
@@ -259,7 +273,33 @@ def calc_attendance_of_month(one_person_queries) -> Series:
             distance_sum,
             timeoff,
             halfway_through,
-        ]
+        ],
+        # index=[
+        #     "オンコール平日担当回数",
+        #     "オンコール土日担当回数",
+        #     "オンコール対応件数",
+        #     "エンゼルケア対応件数",
+        #     "実働時間計",
+        #     "実働時間計（１０進法）",
+        #     "リアル実働時間",
+        #     "実働日数",
+        #     "年休（全日）",
+        #     "年休（半日）",
+        #     "時間外",
+        #     "時間外（１０進法）",
+        #     "遅刻",
+        #     "早退",
+        #     "欠勤",
+        #     "祝日手当時間",
+        #     "祝日手当時間（１０進法）",
+        #     "出張（全日）",
+        #     "出張（半日）",
+        #     "リフレッシュ休暇",
+        #     "走行距離",
+        #     "時間休",
+        #     "中抜け",
+        # ],
+        name=one_person_attendance.STAFFID,
     )
 
     return result_series

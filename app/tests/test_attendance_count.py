@@ -1,31 +1,52 @@
 import pytest
 from datetime import date
+import cProfile
+import pstats
 
 from app.models import User, TableOfCount
-from app.attendance_query_class import AttendanceQuery
-from app.attendance_calc_lib import calc_attendance_of_month
+from app.attendance_query_class import QueryAttendFactory
+from app.attendance_calc_lib import calc_attendance_of_term
+from app.series_to_frame import get_result_dataframe
+
+from_day = date(2024, 10, 1)
+to_day = date(2024, 10, 31)
+# users = (201, 206, 207, 216, 217, 237)
+users = (201, 3)
 
 
 @pytest.fixture(name="aq")
 def setup_attendance_query():
-    from_day = date(2024, 12, 1)
-    to_day = date(2024, 12, 31)
-    attendance_query_obj = AttendanceQuery(
-        201, filter_from_day=from_day, filter_to_day=to_day
-    )
-    attendance_query = attendance_query_obj.get_clerical_attendance(True)
-    return attendance_query
+    attendance_query_factory = QueryAttendFactory(from_day, to_day, True)
+    attendance_query_obj = attendance_query_factory.get_instance(3)
+    # attendance_query_obj.set_data(from_day, to_day, True)
+    # attendance_query = attendance_query_obj.get_clerical_attendance()
+    return attendance_query_obj
 
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_calc_attendance_of_month(aq):
-    test_result_series = calc_attendance_of_month(aq)
-
-    # for query in aq:
-    #     print(f"ID201: {query[0].WORKDAY} {query[1]}")
+    test_result_series = calc_attendance_of_term(aq)
     print(test_result_series)
 
 
+# @pytest.mark.skip
+# @pytest.mark.parametrize("From, To, Users", from_day, to_day, users)
+def test_get_result_dataframe():
+    # test_result_df = get_result_dataframe(from_day, to_day, True, users)
+    # print(test_result_df)
+    get_result_dataframe(from_day, to_day, True, users)
+
+
+@pytest.mark.skip
+def test_run_perf(From, To, Users):
+    pr = cProfile.Profile()
+    pr.runcall(test_get_result_dataframe, From, To, Users)
+    # pr.print_stats()
+    status = pstats.Stats(pr)
+    status.sort_stats("cumtime").print_stats(10)
+
+
+@pytest.mark.skip
 def test_foreignkey():
     user = User(STAFFID=201)
     tc = TableOfCount(staff_id=201)
