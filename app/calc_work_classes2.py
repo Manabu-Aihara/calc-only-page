@@ -1,7 +1,9 @@
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field, InitVar
 from functools import lru_cache
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, date
+
+from sqlalchemy import and_
 
 from .database_base import session
 from .models import (
@@ -12,71 +14,70 @@ from .models import (
     StaffHolidayContract,
 )
 
-# from tkinter import messagebox
-
-# os.environ.get("SECRET_KEY") or "you-will-never-guess"
-# app.permanent_session_lifetime = timedelta(minutes=360)
+""" 一ヶ月単位厳守 """
 
 
-# ***** 年月から最終日を返す*****#
-# def get_last_date(year, month):
-#     return calendar.monthrange(year, month)[1]
-
-
-# ***** 各勤怠カウント計算ひな形（１日基準） *****#
 @dataclass
 class ContractTimeClass:
-    # staff_id: Optional[int]
-    # staff_id: InitVar[int]
 
     @staticmethod
     @lru_cache
-    def get_contract_times(staff_id: int) -> tuple[float]:
+    def get_contract_times(
+        staff_id: int, from_day: date, to_day: date
+    ) -> tuple[float, float]:
         # if staff_id is None:
         #     print(f"---Parent func---: {staff_id}")
         #     return
-        # 必要なデータを一度のクエリで取得
-        you = session.get(User, staff_id)
-        contract = session.get(Contract, you.CONTRACT_CODE)
 
         # 基本の契約時間を設定
-        contract_work_time = contract.WORKTIME
-        contract_holiday_time = contract.WORKTIME
-
-        if contract.CONTRACT_CODE != 2:
-            return contract_work_time, contract_holiday_time
-
-        # パートタイム契約（CONTRACT_CODE == 2）の場合のみ追加処理
-        related_holiday = session.get(RecordPaidHoliday, staff_id)
-        paid_holiday_time = related_holiday.BASETIMES_PAIDHOLIDAY
-
-        # 最新の契約労働・休暇を1回のクエリで取得
-        part_contract_work = (
+        # ここでは、最新の契約労働・休暇を1回のクエリで取得
+        contract_work = (
             session.query(StaffJobContract)
-            .filter(StaffJobContract.STAFFID == staff_id)
+            .filter(
+                and_(
+                    StaffJobContract.STAFFID == staff_id,
+                    StaffJobContract.START_DAY <= to_day,
+                    StaffJobContract.END_DAY >= from_day,
+                )
+            )
             .order_by(StaffJobContract.START_DAY.desc())
             .first()
         )
-        part_contract_holiday = (
+
+        if contract_work.CONTRACT_CODE != 2:
+            contract_work_time = session.get(Contract, contract_work.CONTRACT_CODE)
+            return contract_work_time.WORKTIME, contract_work_time.WORKTIME
+
+        contract_holiday = (
             session.query(StaffHolidayContract)
-            .filter(StaffHolidayContract.STAFFID == staff_id)
+            .filter(
+                and_(
+                    StaffHolidayContract.STAFFID == staff_id,
+                    StaffHolidayContract.START_DAY <= to_day,
+                    StaffHolidayContract.END_DAY >= from_day,
+                )
+            )
             .order_by(StaffHolidayContract.START_DAY.desc())
             .first()
         )
 
+        # パートタイム契約（CONTRACT_CODE == 2）の場合の追加処理
+        related_holiday = session.get(RecordPaidHoliday, staff_id)
+        paid_holiday_time = related_holiday.BASETIMES_PAIDHOLIDAY
         # if related_holiday is None:
         #     raise TypeError("There is not in D_HOLIDAY_HISTORY")
+
         # パートの契約時間
-        # それぞれなければ、RecordPaidHoliday.BASETIMES_PAIDHOLIDAY
+        # それぞれなければ、RecordPaidHoliday.BASETIMES_PAIDHOLIDAYで代用
         contract_work_time = (
             paid_holiday_time
-            if part_contract_work.PART_WORKTIME is None
-            else part_contract_work.PART_WORKTIME
+            if contract_work.PART_WORKTIME is None
+            else contract_work.PART_WORKTIME
         )
         contract_holiday_time = (
             paid_holiday_time
-            if part_contract_holiday is None
-            else part_contract_holiday.HOLIDAY_TIME
+            if contract_holiday is None
+            else contract_holiday.HOLIDAY_TIME
         )
 
         return contract_work_time, contract_holiday_time
@@ -101,6 +102,8 @@ class CalcTimeClass:
     # sh_overtime: str  # = field(init=False)
     # sh_holiday: str  # = field(init=False)
 
+    from_day: date
+    to_day: date
     # CalcTimeFactoryに委譲
     staff_id: InitVar[int]  # = None
 
@@ -124,7 +127,9 @@ class CalcTimeClass:
         # self.n_code_list: List[str] = ["10", "11", "12", "13", "14", "15"]
         # self.n_half_list: List[str] = ["4", "9", "16"]
         # print(f"---Child init---: {self.pre_method(staff_id=staff_id)}")
-        contract_times = ContractTimeClass.get_contract_times(staff_id)
+        contract_times = ContractTimeClass.get_contract_times(
+            staff_id, self.from_day, self.to_day
+        )
 
         self.half_work_time = timedelta(hours=contract_times[0] / 2)
         self.half_holiday_time = timedelta(hours=contract_times[1] / 2)
@@ -365,11 +370,16 @@ class CalcTimeClass:
 
 @dataclass
 class CalcTimeFactory:
+    from_day: date
+    to_day: date
+
     _instances: Dict[int, "CalcTimeClass"] = field(default_factory=dict)
 
     def get_instance(self, staff_id: int) -> "CalcTimeClass":
         if staff_id not in self._instances:
-            self._instances[staff_id] = CalcTimeClass(staff_id)
+            self._instances[staff_id] = CalcTimeClass(
+                self.from_day, self.to_day, staff_id=staff_id
+            )
         return self._instances[staff_id]
 
 

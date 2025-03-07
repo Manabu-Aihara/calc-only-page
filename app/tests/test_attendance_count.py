@@ -1,10 +1,8 @@
 import pytest
 from datetime import date
-import cProfile
-import pstats
 
 from app.models import User, TableOfCount
-from app.attendance_query_class import QueryAttendFactory
+from app.attendance_query_class import QueryAttendFactory, AttendanceQuery
 from app.attendance_calc_lib import calc_attendance_of_term
 from app.series_to_frame import get_result_dataframe
 
@@ -29,7 +27,7 @@ def test_calc_attendance_of_month(aq):
     print(test_result_series)
 
 
-# @pytest.mark.skip
+@pytest.mark.skip
 # @pytest.mark.parametrize("From, To, Users", from_day, to_day, users)
 def test_get_result_dataframe():
     # test_result_df = get_result_dataframe(from_day, to_day, True, users)
@@ -37,13 +35,10 @@ def test_get_result_dataframe():
     get_result_dataframe(from_day, to_day, True, users)
 
 
-@pytest.mark.skip
-def test_run_perf(From, To, Users):
-    pr = cProfile.Profile()
-    pr.runcall(test_get_result_dataframe, From, To, Users)
-    # pr.print_stats()
-    status = pstats.Stats(pr)
-    status.sort_stats("cumtime").print_stats(10)
+def test_query_factory():
+    attendance_query_factory = QueryAttendFactory(staff_id=201)
+    attendance_query_obj = attendance_query_factory.get_instance()
+    assert isinstance(attendance_query_obj, AttendanceQuery)
 
 
 @pytest.mark.skip

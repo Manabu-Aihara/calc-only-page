@@ -1,26 +1,26 @@
 from typing import List, Dict
+from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 
 import pandas as pd
 from pandas import Series
 
 from .calc_work_classes2 import CalcTimeFactory, output_rest_time
-from .attendance_query_class import AttendanceQuery
+from .attendance_query_class import QueryAttendFactory
 
 
-def calc_attendance_of_term(attendance_query: AttendanceQuery) -> Series:
-    # def calc_attendance_of_term(
-    #     self, from_day: date, to_day: date, part_flag: bool
-    # ) -> Series:
+def calc_attendance_of_term(from_day: date, to_day: date, attendance_query) -> Series:
 
     pds = pd.Series
-    calc_time_factory = CalcTimeFactory()
+    calc_time_factory = CalcTimeFactory(from_day=from_day, to_day=to_day)
     # 欠勤扱いコード
     n_absence_list: List[str] = ["8", "17", "18", "19", "20"]
 
     actual_time_sum: float = 0.0
     # 【項目11】実働時間計：60進数
     actual_time60: float = 0.0
+    # 【項目12】実働時間計：10進数
+    actual_time_rnd: Decimal = 0.0
 
     real_work_times = []
     # 【項目13】リアル労働時間計：60進数
@@ -29,10 +29,14 @@ def calc_attendance_of_term(attendance_query: AttendanceQuery) -> Series:
     over_times = []
     # 【項目17】残業時間計：60進数
     over60: float = 0.0
+    # 【項目18】残業時間計：10進数
+    over10_rnd: Decimal = 0.0
 
     nurse_holiday_works = []
     # 【項目22】看護師休日労働時間計：60進数
     holiday_work60: float = 0.0
+    # 【項目23】看護師休日労働時間計：10進数
+    holiday_work10_rnd: Decimal = 0.0
 
     # 【項目7】オンコール平日
     on_call_cnt: int = 0
@@ -72,7 +76,7 @@ def calc_attendance_of_term(attendance_query: AttendanceQuery) -> Series:
     for (
         one_person_attendance,
         contract_code,
-    ) in attendance_query.get_clerical_attendance():
+    ) in attendance_query:
 
         on_call_holiday_cnt += (
             1
@@ -203,7 +207,7 @@ def calc_attendance_of_term(attendance_query: AttendanceQuery) -> Series:
 
         actual_time_sum += actual_second
         time_sum_normal = actual_time_sum / 3600
-        # 【項目12】実働時間計：10進数
+        # 【項目12】
         actual_time_rnd = Decimal(time_sum_normal).quantize(
             Decimal("0.01"), ROUND_HALF_UP
         )
@@ -227,7 +231,7 @@ def calc_attendance_of_term(attendance_query: AttendanceQuery) -> Series:
         over60 = o_h + o_m / 100
 
         over10 = over_sum / (60 * 60)
-        # 【項目18】残業時間計：10進数
+        # 【項目18】
         over10_rnd = Decimal(over10).quantize(Decimal("0.01"), ROUND_HALF_UP)
 
         sum_nrs: int = sum(nurse_holiday_works)
@@ -237,7 +241,7 @@ def calc_attendance_of_term(attendance_query: AttendanceQuery) -> Series:
         holiday_work60 = h_h + h_m / 100
 
         holiday_work_10 = sum_nrs / (60 * 60)
-        # 【項目23】看護師休日労働時間計：10進数
+        # 【項目23】
         holiday_work10_rnd = Decimal(holiday_work_10).quantize(
             Decimal("0.01"), ROUND_HALF_UP
         )
@@ -274,32 +278,32 @@ def calc_attendance_of_term(attendance_query: AttendanceQuery) -> Series:
             timeoff,
             halfway_through,
         ],
-        # index=[
-        #     "オンコール平日担当回数",
-        #     "オンコール土日担当回数",
-        #     "オンコール対応件数",
-        #     "エンゼルケア対応件数",
-        #     "実働時間計",
-        #     "実働時間計（１０進法）",
-        #     "リアル実働時間",
-        #     "実働日数",
-        #     "年休（全日）",
-        #     "年休（半日）",
-        #     "時間外",
-        #     "時間外（１０進法）",
-        #     "遅刻",
-        #     "早退",
-        #     "欠勤",
-        #     "祝日手当時間",
-        #     "祝日手当時間（１０進法）",
-        #     "出張（全日）",
-        #     "出張（半日）",
-        #     "リフレッシュ休暇",
-        #     "走行距離",
-        #     "時間休",
-        #     "中抜け",
-        # ],
-        name=one_person_attendance.STAFFID,
+        index=[
+            "オンコール平日担当回数",
+            "オンコール土日担当回数",
+            "オンコール対応件数",
+            "エンゼルケア対応件数",
+            "実働時間計",
+            "実働時間計（１０進法）",
+            "リアル実働時間",
+            "実働日数",
+            "年休（全日）",
+            "年休（半日）",
+            "時間外",
+            "時間外（１０進法）",
+            "遅刻",
+            "早退",
+            "欠勤",
+            "祝日手当時間",
+            "祝日手当時間（１０進法）",
+            "出張（全日）",
+            "出張（半日）",
+            "リフレッシュ休暇",
+            "走行距離",
+            "時間休",
+            "中抜け",
+        ],
+        # name=one_person_attendance.STAFFID,
     )
 
     return result_series

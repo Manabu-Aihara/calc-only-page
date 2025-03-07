@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field, InitVar
-from typing import Dict
+from typing import Dict, Optional
 from datetime import date
 
 from .database_base import session
@@ -12,13 +12,15 @@ from .models import (
 
 @dataclass
 class AttendanceQuery:
-    staff_id: int
-    filter_from_day: date
-    filter_to_day: date
-    part_time_flag: bool
-    # staff_id: InitVar[int]
+    # staff_id: int
+    # filter_from_day: date
+    # filter_to_day: date
+    # part_time_flag: bool
+    staff_id: InitVar[int]
 
-    def __post_init__(self, staff_id: int):
+    # `__post_init__`は、通常`__init__`の後に追加の初期化処理が必要な場合にのみ使用します
+    # このため、__post_init__で同じ値を再代入する処理は不要 by cursor
+    def __post_init__(self, staff_id):
         self.staff_id = staff_id
 
     def set_data(
@@ -32,7 +34,7 @@ class AttendanceQuery:
         attendance_filters = []
         attendance_filters.append(Attendance.STAFFID == self.staff_id)
         # pymysql.err.OperationalError: (1241, 'Operand should contain 1 column(s)')対策も、
-        # ファクトリーにしているため、単体のインスタンスで値が合算される
+        # 🙅ファクトリーにしているため、単体のインスタンスで値が合算される
         # attendance_filters.append(Attendance.STAFFID.in_(self.staff_id))
         attendance_filters.append(
             Attendance.WORKDAY.between(self.filter_from_day, self.filter_to_day)
@@ -93,18 +95,21 @@ class AttendanceQuery:
 
 @dataclass
 class QueryAttendFactory:
-    filter_from_day: date
-    filter_to_day: date
-    part_time_flag: bool
+    # staff_id: int
+    # filter_from_day: date
+    # filter_to_day: date
+    # part_time_flag: bool
 
     _instances: Dict[int, "AttendanceQuery"] = field(default_factory=dict)
+    # _instances: Optional["AttendanceQuery"] = field(default=None)  # field(default_factory=AttendanceQuery)
 
     def get_instance(self, staff_id: int) -> "AttendanceQuery":
         if staff_id not in self._instances:
+            # if self._instances is None:
             self._instances[staff_id] = AttendanceQuery(
-                self.filter_from_day,
-                self.filter_to_day,
-                self.part_time_flag,
+                # self.filter_from_day,
+                # self.filter_to_day,
+                # self.part_time_flag,
                 staff_id=staff_id,
             )
         return self._instances[staff_id]
