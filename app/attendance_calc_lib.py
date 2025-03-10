@@ -6,7 +6,6 @@ import pandas as pd
 from pandas import Series
 
 from .calc_work_classes2 import CalcTimeFactory, output_rest_time
-from .attendance_query_class import QueryAttendFactory
 
 
 def calc_attendance_of_term(from_day: date, to_day: date, attendance_query) -> Series:
@@ -303,7 +302,7 @@ def calc_attendance_of_term(from_day: date, to_day: date, attendance_query) -> S
             "時間休",
             "中抜け",
         ],
-        # name=one_person_attendance.STAFFID,
+        name=one_person_attendance.STAFFID,
     )
 
     return result_series

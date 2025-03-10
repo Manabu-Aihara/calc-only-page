@@ -23,12 +23,10 @@ class AttendanceQuery:
     def __post_init__(self, staff_id):
         self.staff_id = staff_id
 
-    def set_data(
-        self, filter_from_day: date, filter_to_day: date, part_time_flag: bool
-    ):
+    def set_data(self, filter_from_day: date, filter_to_day: date):
         self.filter_from_day = filter_from_day
         self.filter_to_day = filter_to_day
-        self.part_time_flag = part_time_flag
+        # self.part_time_flag = part_time_flag
 
     def _get_filter(self) -> list:
         attendance_filters = []
@@ -47,11 +45,11 @@ class AttendanceQuery:
         attendance_filters.append(Attendance.STAFFID == StaffJobContract.STAFFID)
         attendance_filters.append(StaffJobContract.START_DAY <= Attendance.WORKDAY)
         attendance_filters.append(StaffJobContract.END_DAY >= Attendance.WORKDAY)
-        (
-            attendance_filters.append(StaffJobContract.CONTRACT_CODE != 2)
-            if self.part_time_flag is False
-            else attendance_filters.append(StaffJobContract.CONTRACT_CODE == 2)
-        )
+        # (
+        #     attendance_filters.append(StaffJobContract.CONTRACT_CODE != 2)
+        #     if self.part_time_flag is False
+        #     else attendance_filters.append(StaffJobContract.CONTRACT_CODE == 2)
+        # )
         return attendance_filters
 
         # Max attendance_filters[0:8] index7まで取り出す
