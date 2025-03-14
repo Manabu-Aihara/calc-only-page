@@ -1,5 +1,5 @@
-from typing import List, Dict
-from datetime import date
+from typing import List, Dict, Tuple
+from datetime import date, datetime
 from decimal import Decimal, ROUND_HALF_UP
 
 import pandas as pd
@@ -8,7 +8,20 @@ from pandas import Series
 from .calc_work_classes2 import CalcTimeFactory, output_rest_time
 
 
-def calc_attendance_of_term(from_day: date, to_day: date, attendance_query) -> Series:
+def config_from_to() -> Tuple[date, date]:
+    today = datetime.today()
+    from_day4 = date(year=(today.year - 2), month=4, day=1)
+    to_day4 = date(year=today.year, month=3, day=31)
+    from_day10 = date(year=(today.year - 2), month=10, day=1)
+    to_day10 = date(year=today.year, month=9, day=30)
+    if today.month in [4, 5, 6, 7, 8, 9]:
+        return from_day10, to_day10
+    else:
+        return from_day4, to_day4
+
+
+def calc_attendance_of_term(attendance_query) -> Series:
+    from_day, to_day = config_from_to()
 
     pds = pd.Series
     calc_time_factory = CalcTimeFactory(from_day=from_day, to_day=to_day)

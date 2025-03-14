@@ -1,4 +1,5 @@
 import pytest
+from pytest_mock import MockFixture
 from datetime import date
 import pprint
 import cProfile
@@ -10,8 +11,7 @@ from app.database_base import session
 from app.models import StaffJobContract
 from app.calc_work_classes2 import ContractTimeClass
 from app.attendance_query_class import QueryAttendFactory
-from app.series_to_frame import calc_3d_attendance
-from app.main import put_vertical_dataframe
+from app.series_to_frame import extract_to_dataframe, put_vertical_dataframe
 
 from_day = date(2024, 9, 1)
 to_day = date(2025, 1, 31)
@@ -54,13 +54,17 @@ def get_attend_query():
 
 @pytest.mark.skip
 def test_calc_3d_attendance(attend_query):
-    test_result_df = calc_3d_attendance(201, attend_query, from_day, to_day)
+    test_result_df = extract_to_dataframe(201, attend_query)
     pprint.pprint(test_result_df, width=240)
 
 
-def test_put_vertical_dataframe():
+def test_put_vertical_dataframe(mocker: MockFixture):
+    mock_date = mocker.patch(
+        "app.attendance_calc_lib.config_from_to", return_value=(from_day, to_day)
+    )
     test_df = put_vertical_dataframe(2)
     print(test_df)
+    assert mock_date.called
 
 
 @pytest.mark.skip

@@ -22,6 +22,7 @@ def get_more_condition_users(
     result_data_list = []
     for query_instance in query_instances:
         # 退職日
+        # query(Attendance, StaffJobContract.CONTRACT_CODE)なので
         date_c_name1: datetime = getattr(query_instance[0], date_columun)
         # if date_c_name0 is None:
         #     TypeError出してくれる
@@ -58,6 +59,7 @@ def get_conditional_users_query(part_time_flag: bool) -> list:
         session.query(User, StaffJobContract.CONTRACT_CODE)
         .join(StaffJobContract, StaffJobContract.STAFFID == User.STAFFID)
         .filter(*filter_item)
+        .group_by(StaffJobContract.CONTRACT_CODE)
         .all()
     )
     return get_more_condition_users(users_without_condition)

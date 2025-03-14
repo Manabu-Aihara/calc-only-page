@@ -18,6 +18,7 @@ class AttendanceQuery:
     # part_time_flag: bool
     staff_id: InitVar[int]
 
+    # ！ _instances: Optional["AttendanceQuery"] = field(default=None)にする場合
     # `__post_init__`は、通常`__init__`の後に追加の初期化処理が必要な場合にのみ使用します
     # このため、__post_init__で同じ値を再代入する処理は不要 by cursor
     def __post_init__(self, staff_id):
@@ -99,7 +100,7 @@ class QueryAttendFactory:
     # part_time_flag: bool
 
     _instances: Dict[int, "AttendanceQuery"] = field(default_factory=dict)
-    # _instances: Optional["AttendanceQuery"] = field(default=None)  # field(default_factory=AttendanceQuery)
+    # _instances: Optional["AttendanceQuery"] = field(default=None) # field(default_factory=AttendanceQuery)
 
     def get_instance(self, staff_id: int) -> "AttendanceQuery":
         if staff_id not in self._instances:
