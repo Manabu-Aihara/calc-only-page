@@ -59,7 +59,7 @@ def get_conditional_users_query(part_time_flag: bool) -> list:
         session.query(User, StaffJobContract.CONTRACT_CODE)
         .join(StaffJobContract, StaffJobContract.STAFFID == User.STAFFID)
         .filter(*filter_item)
-        .group_by(StaffJobContract.CONTRACT_CODE)
+        # .group_by(StaffJobContract.CONTRACT_CODE)
         .all()
     )
     return get_more_condition_users(users_without_condition)

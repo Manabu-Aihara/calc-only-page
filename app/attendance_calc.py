@@ -1,30 +1,19 @@
 from typing import List, Dict, Tuple
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 
 import pandas as pd
 from pandas import Series
 
-from .calc_work_classes2 import CalcTimeFactory, output_rest_time
+from .calc_work_classes3 import CalcTimeClass, output_rest_time
 
 
-def config_from_to() -> Tuple[date, date]:
-    today = datetime.today()
-    from_day4 = date(year=(today.year - 2), month=4, day=1)
-    to_day4 = date(year=today.year, month=3, day=31)
-    from_day10 = date(year=(today.year - 2), month=10, day=1)
-    to_day10 = date(year=today.year, month=9, day=30)
-    if today.month in [4, 5, 6, 7, 8, 9]:
-        return from_day10, to_day10
-    else:
-        return from_day4, to_day4
-
-
-def calc_attendance_of_term(attendance_query) -> Series:
-    from_day, to_day = config_from_to()
-
+def calc_attendance_of_term(
+    setting_time: CalcTimeClass,
+    group_data_list: list,
+) -> Series:
     pds = pd.Series
-    calc_time_factory = CalcTimeFactory(from_day=from_day, to_day=to_day)
+
     # 欠勤扱いコード
     n_absence_list: List[str] = ["8", "17", "18", "19", "20"]
 
@@ -85,10 +74,16 @@ def calc_attendance_of_term(attendance_query) -> Series:
     # 【項目29】中抜け
     halfway_through: int = 0
 
+    c_work_time: float = 0.0
+    c_holiday_time: float = 0.0
+
+    # Tuple[Attendance, StaffJobContract, StaffHolidayContract, float]
     for (
         one_person_attendance,
-        contract_code,
-    ) in attendance_query:
+        job_contract,
+        holiday_contract,
+        work_time,
+    ) in group_data_list:
 
         on_call_holiday_cnt += (
             1
@@ -159,9 +154,9 @@ def calc_attendance_of_term(attendance_query) -> Series:
         #     f"Inner Count log: {holiday_cnt} {half_holiday_cnt} {late_cnt} {leave_early_cnt} {absence_cnt} {trip_cnt} {half_trip_cnt}"
         # )
 
-        real_time_sum_append = real_work_times.append
+        real_time_append = real_work_times.append
         over_time_append = over_times.append
-        nurse_holiday_append = nurse_holiday_works.append
+        nurse_holiday_work_append = nurse_holiday_works.append
         # setting_time.staff_id = one_person_attendance.STAFFID
         # setting_time.sh_starttime = one_person_attendance.STARTTIME
         # setting_time.sh_endtime = one_person_attendance.ENDTIME
@@ -171,17 +166,33 @@ def calc_attendance_of_term(attendance_query) -> Series:
         # )
         # setting_time.sh_overtime = one_person_attendance.OVERTIME
         # setting_time.sh_holiday = one_person_attendance.HOLIDAY
-        setting_time = calc_time_factory.get_instance(one_person_attendance.STAFFID)
-        setting_time.set_data(
-            one_person_attendance.STARTTIME,
-            one_person_attendance.ENDTIME,
-            (
-                one_person_attendance.NOTIFICATION,
-                one_person_attendance.NOTIFICATION2,
-            ),
-            one_person_attendance.OVERTIME,
-            one_person_attendance.HOLIDAY,
-        )
+        # setting_time = calc_time_factory.get_instance(one_person_attendance.STAFFID)
+        if job_contract.CONTRACT_CODE != 2:
+            setting_time.set_data(
+                work_time,
+                work_time,
+                one_person_attendance.STARTTIME,
+                one_person_attendance.ENDTIME,
+                (
+                    one_person_attendance.NOTIFICATION,
+                    one_person_attendance.NOTIFICATION2,
+                ),
+                one_person_attendance.OVERTIME,
+                one_person_attendance.HOLIDAY,
+            )
+        else:
+            setting_time.set_data(
+                job_contract.PART_WORKTIME,
+                holiday_contract.HOLIDAY_TIME,
+                one_person_attendance.STARTTIME,
+                one_person_attendance.ENDTIME,
+                (
+                    one_person_attendance.NOTIFICATION,
+                    one_person_attendance.NOTIFICATION2,
+                ),
+                one_person_attendance.OVERTIME,
+                one_person_attendance.HOLIDAY,
+            )
 
         print(f"ID: {one_person_attendance.STAFFID}")
         actual_work_time = setting_time.get_actual_work_time()
@@ -194,25 +205,22 @@ def calc_attendance_of_term(attendance_query) -> Series:
         #         "error/403.html", title="Exception message", message=msg
         #     )
         # else:
-        # real_time_sum.append(calc_real_time)
-        real_time_sum_append(calc_real_time)
-        if one_person_attendance.OVERTIME == "1" and contract_code != 2:
-            # over_time_0.append(over_time)
+
+        # real_work_times.append(calc_real_time)
+        real_time_append(calc_real_time)
+        if one_person_attendance.OVERTIME == "1" and job_contract.CONTRACT_CODE != 2:
+            # over_times.append(over_time)
             over_time_append(over_time)
         if nurse_holiday_work_time != 9.99:
-            # syukkin_holiday_times_0.append(nurse_holiday_work_time)
-            nurse_holiday_append(nurse_holiday_work_time)
+            # nurse_holiday_works.append(nurse_holiday_work_time)
+            nurse_holiday_work_append(nurse_holiday_work_time)
 
-        print(f"{one_person_attendance.WORKDAY.day} 日")
+        print(f"{one_person_attendance.WORKDAY}")
         # print(f"Real time: {calc_real_time}")
         # print(f"Actual time: {actual_work_time}")
         # print(f"Real time list: {real_work_times}")
         # print(f"Over time list: {over_times}")
         # print(f"Nurse holiday: {nurse_holiday_works}")
-
-        # ここで宣言された変数は“+=”不可
-        # work_time_sum_60: float = 0.0
-        # 🙅 work_time_sum_60 += AttendanceDada[one_person_attendance.WORKDAY.day][14]
 
         actual_second = actual_work_time.total_seconds()
         workday_count += 1 if actual_second != 0.0 else 0
@@ -264,8 +272,13 @@ def calc_attendance_of_term(attendance_query) -> Series:
         timeoff += sum_dict.get("Off")
         halfway_through += sum_dict.get("Through")
 
+        c_work_time = work_time
+        c_holiday_time = holiday_contract.HOLIDAY_TIME
+
     result_series = pds(
         [
+            c_work_time,
+            c_holiday_time,
             on_call_cnt,
             on_call_holiday_cnt,
             on_call_correspond_cnt,
@@ -291,6 +304,8 @@ def calc_attendance_of_term(attendance_query) -> Series:
             halfway_through,
         ],
         index=[
+            "契約労働（時間）",
+            "契約休憩（時間）",
             "オンコール平日担当回数",
             "オンコール土日担当回数",
             "オンコール対応件数",
@@ -315,7 +330,7 @@ def calc_attendance_of_term(attendance_query) -> Series:
             "時間休",
             "中抜け",
         ],
-        name=one_person_attendance.STAFFID,
+        name=job_contract.START_DAY,
     )
 
     return result_series

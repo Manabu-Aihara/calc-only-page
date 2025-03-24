@@ -7,6 +7,7 @@ from sqlalchemy import (
     Float,
     DateTime,
     Date,
+    PrimaryKeyConstraint,
 )
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash
@@ -93,10 +94,7 @@ class CollateralTemplate(Base):
 #     )
 #     JOBTYPE_CODE = Column(Integer, index=True, nullable=False)
 #     CONTRACT_CODE = Column(Integer, index=True, nullable=False)
-#     PART_WORKTIME = Column(Integer, index=True, nullable=False)
-#     START_DAY = Column(Date, primary_key=True, index=True, nullable=True)
-#     END_DAY = Column(Date, index=True, nullable=True)
-
+#
 #     def __init__(
 #         self, STAFFID, JOBTYPE_CODE, CONTRACT_CODE, PART_WORKTIME, START_DAY, END_DAY
 #     ):
@@ -111,6 +109,8 @@ class CollateralTemplate(Base):
 
 class StaffJobContract(Base):
     __tablename__ = "D_JOB_HISTORY"
+    # 複合主キー！重複でも表示させるため、START_DAYを加える
+    __table_args__ = (PrimaryKeyConstraint("STAFFID", "START_DAY"),)
     # __table_args__ = (
     #     ForeignKeyConstraint(
     #         ["JOBTYPE_CODE", "CONTRACT_CODE"],
@@ -120,7 +120,7 @@ class StaffJobContract(Base):
     STAFFID = Column(
         Integer,
         ForeignKey("M_STAFFINFO.STAFFID"),
-        primary_key=True,
+        # primary_key=True,
         index=True,
         nullable=False,
     )
@@ -151,7 +151,7 @@ class StaffJobContract(Base):
     )
 
     PART_WORKTIME = Column(Float, index=True, nullable=False)
-    START_DAY = Column(Date, primary_key=True, index=True, nullable=True)
+    START_DAY = Column(Date, index=True, nullable=True)
     END_DAY = Column(Date, index=True, nullable=True)
 
     # timecard_template = relationship(
@@ -174,18 +174,21 @@ class StaffJobContract(Base):
 
 class StaffHolidayContract(Base):
     __tablename__ = "D_HOLIDAY_HISTORY"
+    # 複合主キー！重複でも表示させるため、START_DAYを加える
+    __table_args__ = (PrimaryKeyConstraint("STAFFID", "HOLIDAY_TIME", "START_DAY"),)
+
     STAFFID = Column(
         Integer,
         ForeignKey("M_STAFFINFO.STAFFID"),
-        primary_key=True,
         index=True,
         nullable=False,
     )
-    HOLIDAY_TIME = Column(Integer, primary_key=True, index=True, nullable=False)
+    HOLIDAY_TIME = Column(Integer, index=True, nullable=False)
     START_DAY = Column(Date, index=True, nullable=True)
     END_DAY = Column(Date, index=True, nullable=True)
 
-    def __init__(self, HOLIDAY_TIME, START_DAY, END_DAY):
+    def __init__(self, STAFFID, HOLIDAY_TIME, START_DAY, END_DAY):
+        self.STAFFID = STAFFID
         self.HOLIDAY_TIME = HOLIDAY_TIME
         self.START_DAY = START_DAY
         self.END_DAY = END_DAY

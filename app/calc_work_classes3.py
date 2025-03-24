@@ -3,109 +3,19 @@ from dataclasses import dataclass, field, InitVar
 from functools import lru_cache
 from datetime import datetime, timedelta, time, date
 
-from sqlalchemy import and_
-
 from .database_base import session
-from .models import (
-    User,
-    Contract,
-    RecordPaidHoliday,
-    StaffJobContract,
-    StaffHolidayContract,
-)
-
-""" 一ヶ月単位厳守 """
+from .models import User
+from .attendance_contract_query import ContractTimeAttendance
 
 
-@dataclass
-class ContractTimeClass:
-
-    @staticmethod
-    @lru_cache
-    def get_contract_times(
-        staff_id: int, from_day: date, to_day: date
-    ) -> tuple[float, float]:
-        # if staff_id is None:
-        #     print(f"---Parent func---: {staff_id}")
-        #     return
-
-        # 基本の契約時間を設定
-        # ここでは、最新の契約労働・休暇を1回のクエリで取得
-        contract_work = (
-            session.query(StaffJobContract)
-            .filter(
-                and_(
-                    StaffJobContract.STAFFID == staff_id,
-                    StaffJobContract.START_DAY <= to_day,
-                    StaffJobContract.END_DAY >= from_day,
-                )
-            )
-            .order_by(StaffJobContract.START_DAY.desc())
-            .first()
-        )
-
-        if contract_work.CONTRACT_CODE != 2:
-            contract_work_time = session.get(Contract, contract_work.CONTRACT_CODE)
-            return contract_work_time.WORKTIME, contract_work_time.WORKTIME
-
-        contract_holiday = (
-            session.query(StaffHolidayContract)
-            .filter(
-                and_(
-                    StaffHolidayContract.STAFFID == staff_id,
-                    StaffHolidayContract.START_DAY <= to_day,
-                    StaffHolidayContract.END_DAY >= from_day,
-                )
-            )
-            .order_by(StaffHolidayContract.START_DAY.desc())
-            .first()
-        )
-
-        # パートタイム契約（CONTRACT_CODE == 2）の場合の追加処理
-        related_holiday = session.get(RecordPaidHoliday, staff_id)
-        paid_holiday_time = related_holiday.BASETIMES_PAIDHOLIDAY
-        # if related_holiday is None:
-        #     raise TypeError("There is not in D_HOLIDAY_HISTORY")
-
-        # パートの契約時間
-        # それぞれなければ、RecordPaidHoliday.BASETIMES_PAIDHOLIDAYで代用
-        contract_work_time = (
-            paid_holiday_time
-            if contract_work.PART_WORKTIME is None
-            else contract_work.PART_WORKTIME
-        )
-        contract_holiday_time = (
-            paid_holiday_time
-            if contract_holiday is None
-            else contract_holiday.HOLIDAY_TIME
-        )
-
-        return contract_work_time, contract_holiday_time
-
-    # オブジェクトがハッシュ可能であるか判定する.
-    @staticmethod
-    def hashable(x):
-        try:
-            hash(x)
-            return True
-        except TypeError:
-            return False
-
-
-# ***** 常勤用各勤怠時間計算ひな形 *****#
 @dataclass
 class CalcTimeClass:
-    # staff_id: Optional[int]  # = field(default=None, init=False)
-    # sh_starttime: str  # = field(init=False)
-    # sh_endtime: str  # = field(init=False)
-    # notifications: tuple[str]  # = field(init=False)
-    # sh_overtime: str  # = field(init=False)
-    # sh_holiday: str  # = field(init=False)
-
     from_day: date
     to_day: date
+    # staff_id: int
     # CalcTimeFactoryに委譲
     staff_id: InitVar[int]  # = None
+    # key_start_day: InitVar[date]
 
     n_code_list: List[str] = field(
         default_factory=lambda: ["10", "11", "12", "13", "14", "15"]
@@ -115,35 +25,33 @@ class CalcTimeClass:
         default_factory=lambda: ["8", "17", "18", "19", "20"]
     )
 
-    # def pre_method(self, staff_id: int):
-    #     return ContractTimeClass.get_contract_times(staff_id)
-
-    # あるとすれば、これはどこのタイミング？
     def __post_init__(self, staff_id: int):
-        if staff_id is None:
-            return
-        # どっちでもいい
-        # self.n_code_list: List[str] = ["10", "11", "12", "13", "14", "15"]
-        # self.n_half_list: List[str] = ["4", "9", "16"]
-        # print(f"---Child init---: {self.pre_method(staff_id=staff_id)}")
-        contract_times = ContractTimeClass.get_contract_times(
-            staff_id, self.from_day, self.to_day
-        )
+        # contract_times = ContractTimeClass.get_contract_times(
+        #     staff_id, self.from_day, self.to_day
+        # )
 
-        self.half_work_time = timedelta(hours=contract_times[0] / 2)
-        self.half_holiday_time = timedelta(hours=contract_times[1] / 2)
-        self.full_work_time = timedelta(hours=contract_times[0])
-        self.full_holiday_time = timedelta(hours=contract_times[1])
+        # self.half_work_time = timedelta(hours=contract_times[0] / 2)
+        # self.half_holiday_time = timedelta(hours=contract_times[1] / 2)
+        # self.full_work_time = timedelta(hours=contract_times[0])
+        # self.full_holiday_time = timedelta(hours=contract_times[1])
         self.staff_id = staff_id
+        # self.start_day = start_day
+        self.contract_summary_obj = ContractTimeAttendance(
+            staff_id=staff_id, filter_from_day=self.from_day, filter_to_day=self.to_day
+        )
 
     def set_data(
         self,
+        c_work_time: float,
+        c_holiday_time: float,
         sh_starttime: str,
         sh_endtime: str,
         notifications: tuple[str],
         sh_overtime: str,
         sh_holiday: str,
     ):
+        self.c_work_time = timedelta(hours=c_work_time)
+        self.c_holiday_time = timedelta(hours=c_holiday_time)
         self.sh_starttime = sh_starttime
         self.sh_endtime = sh_endtime
         self.notifications = notifications
@@ -168,7 +76,7 @@ class CalcTimeClass:
 
     """
         労働時間は2パターン
-        1. self.full_work_time()
+        1. self.c_work_time()
         2. calc_base_work_time() - calc_normal_rest_time(...)
         """
 
@@ -230,7 +138,7 @@ class CalcTimeClass:
 
     # 半日出張、半休、生理休暇かつ打刻のある場合
     def provide_half_rest(self) -> timedelta:
-        # print(f"Start inner method: {self.full_work_time}")
+        # print(f"Start inner method: {self.c_work_time}")
         input_time = self.calc_base_work_time()
         working_time = input_time - self.calc_normal_rest(input_time)
 
@@ -241,24 +149,24 @@ class CalcTimeClass:
 
         if approval_count == 0:
             return (
-                self.full_work_time - working_time
-                # irregular
-                if working_time < self.full_work_time
+                self.c_work_time - working_time
+                # irregular!
+                if working_time < self.c_work_time
                 else timedelta(0)
             )
         elif approval_count == 1:
             return (
-                self.full_work_time - input_time
-                # irregular
-                if input_time < self.half_work_time
+                self.c_work_time - input_time
+                # irregular!
+                if input_time < (self.c_work_time / 2)
                 else (
-                    self.half_work_time
+                    (self.c_work_time / 2)
                     if "6" in self.notifications
-                    else self.half_holiday_time
+                    else (self.c_holiday_time / 2)
                 )
             )
         else:  # approval_count == 2
-            return self.half_work_time + self.half_holiday_time
+            return (self.c_work_time / 2) + (self.c_holiday_time / 2)
 
     """
         @Return: timedelta
@@ -272,18 +180,18 @@ class CalcTimeClass:
         input_work_time = self.calc_base_work_time()
         if self.sh_overtime == "0":
             working_time = (
-                self.full_work_time
+                self.c_work_time
                 - self.provide_half_rest()
                 # - self.calc_normal_rest(input_work_time)
             )
             # 契約時間 / 2 or 契約時間 or irregular
             return working_time
         elif self.sh_overtime == "1":  # 残業した場合
-            work_without_time_rest = input_work_time - self.calc_normal_rest(
+            work_without_rest_time = input_work_time - self.calc_normal_rest(
                 input_work_time
             )
-            print(f"△Over without rest: {work_without_time_rest}")
-            return work_without_time_rest
+            print(f"△Over without rest: {work_without_rest_time}")
+            return work_without_rest_time
 
     """
         実働時間表示
@@ -298,11 +206,11 @@ class CalcTimeClass:
         print(f"△Actual second: {input_work_time.total_seconds()}")
         for notification in self.notifications:
             if notification == "5":
-                return self.full_work_time
+                return self.c_work_time
             elif notification == "3" or (
                 notification == "9" and self.sh_starttime == "00:00"
             ):
-                return self.full_holiday_time
+                return self.c_holiday_time
             elif notification in self.n_absence_list:
                 return timedelta(0)
             else:
@@ -310,7 +218,6 @@ class CalcTimeClass:
                 return (
                     input_work_time
                     + (
-                        # 申請貼れば、irregular数値は返さない
                         self.provide_half_rest()
                         if notification in self.n_half_list + ["6"]
                         else timedelta(0)
@@ -326,9 +233,7 @@ class CalcTimeClass:
     def get_over_time(self) -> float:
         working_time = self.check_over_work()
         # パートはありません
-        over_time_in_work = working_time - (
-            self.full_work_time - self.provide_half_rest()
-        )
+        over_time_in_work = working_time - (self.c_work_time - self.provide_half_rest())
         return over_time_in_work.total_seconds()
 
     """
@@ -372,20 +277,24 @@ class CalcTimeFactory:
     from_day: date
     to_day: date
 
-    _instances: Dict[int, "CalcTimeClass"] = field(default_factory=dict)
+    _instances: Dict[str, "CalcTimeClass"] = field(default_factory=dict)
 
     def get_instance(self, staff_id: int) -> "CalcTimeClass":
-        if staff_id not in self._instances:
+        if staff_id not in self._instances.keys():
             self._instances[staff_id] = CalcTimeClass(
-                self.from_day, self.to_day, staff_id=staff_id
+                self.from_day,
+                self.to_day,
+                staff_id=staff_id,
+                # key_start_day=key_start_day,
             )
+            print(" instance始めました")
         return self._instances[staff_id]
 
 
 """ 時間休カウント """
 
 
-# @lru_cache
+@lru_cache
 def output_rest_time(notification_am: Optional[str], notification_pm: Optional[str]):
     # def output_rest_time(*notifications: str) -> Dict[str, int]:
     n_time_list: List[int] = [1, 2, 3]
