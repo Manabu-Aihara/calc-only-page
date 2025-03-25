@@ -5,17 +5,17 @@ from datetime import datetime, timedelta, time, date
 
 from .database_base import session
 from .models import User
-from .attendance_contract_query import ContractTimeAttendance
 
 
 @dataclass
 class CalcTimeClass:
-    from_day: date
-    to_day: date
+    # from_day: date
+    # to_day: date
     # staff_id: int
     # CalcTimeFactoryに委譲
     staff_id: InitVar[int]  # = None
-    # key_start_day: InitVar[date]
+    # start_day: InitVar[date]
+    # key_end_day: InitVar[date]
 
     n_code_list: List[str] = field(
         default_factory=lambda: ["10", "11", "12", "13", "14", "15"]
@@ -36,9 +36,7 @@ class CalcTimeClass:
         # self.full_holiday_time = timedelta(hours=contract_times[1])
         self.staff_id = staff_id
         # self.start_day = start_day
-        self.contract_summary_obj = ContractTimeAttendance(
-            staff_id=staff_id, filter_from_day=self.from_day, filter_to_day=self.to_day
-        )
+        # self.key_end_day = key_end_day
 
     def set_data(
         self,
@@ -274,20 +272,22 @@ class CalcTimeClass:
 
 @dataclass
 class CalcTimeFactory:
-    from_day: date
-    to_day: date
+    # from_day: date
+    # to_day: date
 
     _instances: Dict[str, "CalcTimeClass"] = field(default_factory=dict)
 
     def get_instance(self, staff_id: int) -> "CalcTimeClass":
-        if staff_id not in self._instances.keys():
+        # str_end_day = f"{end_day}"
+        # key_list = list(self._instances.keys())
+        # print(f" Key list: {key_list}")
+        if staff_id not in self._instances:
             self._instances[staff_id] = CalcTimeClass(
-                self.from_day,
-                self.to_day,
                 staff_id=staff_id,
-                # key_start_day=key_start_day,
+                # start_day=start_day,
+                # key_end_day=end_day,
             )
-            print(" instance始めました")
+            print("instance始めました")
         return self._instances[staff_id]
 
 

@@ -74,9 +74,6 @@ def calc_attendance_of_term(
     # 【項目29】中抜け
     halfway_through: int = 0
 
-    c_work_time: float = 0.0
-    c_holiday_time: float = 0.0
-
     # Tuple[Attendance, StaffJobContract, StaffHolidayContract, float]
     for (
         one_person_attendance,
@@ -166,7 +163,6 @@ def calc_attendance_of_term(
         # )
         # setting_time.sh_overtime = one_person_attendance.OVERTIME
         # setting_time.sh_holiday = one_person_attendance.HOLIDAY
-        # setting_time = calc_time_factory.get_instance(one_person_attendance.STAFFID)
         if job_contract.CONTRACT_CODE != 2:
             setting_time.set_data(
                 work_time,
@@ -272,13 +268,8 @@ def calc_attendance_of_term(
         timeoff += sum_dict.get("Off")
         halfway_through += sum_dict.get("Through")
 
-        c_work_time = work_time
-        c_holiday_time = holiday_contract.HOLIDAY_TIME
-
     result_series = pds(
         [
-            c_work_time,
-            c_holiday_time,
             on_call_cnt,
             on_call_holiday_cnt,
             on_call_correspond_cnt,
@@ -304,8 +295,6 @@ def calc_attendance_of_term(
             halfway_through,
         ],
         index=[
-            "契約労働（時間）",
-            "契約休憩（時間）",
             "オンコール平日担当回数",
             "オンコール土日担当回数",
             "オンコール対応件数",
@@ -330,7 +319,6 @@ def calc_attendance_of_term(
             "時間休",
             "中抜け",
         ],
-        name=job_contract.START_DAY,
     )
 
     return result_series

@@ -105,8 +105,6 @@ class ContractTimeAttendance:
 
     def get_perfect_contract_attendance(self):
         base_filters = self._get_base_filter()
-        job_filters = self._get_job_filter()
-        holiday_filters = self._get_holiday_filter()
 
         member_calc_for_queries = (
             session.query(
@@ -133,7 +131,8 @@ class ContractTimeAttendance:
             .filter(
                 and_(
                     *base_filters,
-                    StaffJobContract.END_DAY > self.filter_from_day,
+                    # StaffJobContract.END_DAY > self.filter_from_day,
+                    # StaffHolidayContract.END_DAY > self.filter_from_day,
                 )
             )
         )

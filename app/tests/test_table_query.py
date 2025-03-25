@@ -1,5 +1,5 @@
 import pytest
-from typing import Dict
+from typing import Dict, List
 from datetime import date
 from itertools import groupby
 
@@ -15,44 +15,57 @@ to_day = date(2025, 3, 31)
 @pytest.fixture
 def perfect_query():
     contract_time_obj = ContractTimeAttendance(
-        staff_id=135, filter_from_day=from_day, filter_to_day=to_day
+        staff_id=189, filter_from_day=from_day, filter_to_day=to_day
     )
     return contract_time_obj.get_perfect_contract_attendance()
 
 
 @pytest.mark.skip
 def test_start_day_group(perfect_query):
-    part_contract_summary: Dict[str, list] = {}
-    for key, group in groupby(perfect_query, lambda x: (x[1], x[3])):
+    contract_summary: Dict[str, list] = {}
+    for key, group in groupby(perfect_query, lambda x: (x[1].END_DAY, x[2].END_DAY)):
         contract_info_list = list(group)
         contract_work_list = []
         contract_holiday_list = []
         for contract_info in contract_info_list:
-            holiday_contract: StaffHolidayContract = contract_info[1]
-            work_time = contract_info[2]
-            holiday_time = holiday_contract.HOLIDAY_TIME
-            contract_work_list.append((work_time, holiday_time))
-            contract_holiday_list.append((work_time, holiday_time))
+            work_time = (
+                contract_info[3]
+                if contract_info[1].CONTRACT_CODE != 2
+                else contract_info[1].PART_WORKTIME
+            )
+            holiday_time = (
+                contract_info[2].HOLIDAY_TIME
+                if contract_info[2] is not None
+                else contract_info[3]
+            )
+            contract_work_list.append(
+                (contract_info[0].WORKDAY, work_time, holiday_time)
+            )
+            contract_holiday_list.append(
+                (contract_info[0].WORKDAY, work_time, holiday_time)
+            )
         # print(type(key[0]))
         # assert isinstance(holiday_contract, StaffHolidayContract)
-        part_contract_summary[f"{key[0].START_DAY}"] = set(contract_holiday_list)
-        part_contract_summary[f"{key[1]}"] = set(contract_work_list)
+        contract_summary[f"{key[0]}"] = contract_work_list
+        contract_summary[f"{key[1]}"] = contract_holiday_list
 
     # print(part_contract_summary)
-    for start_day, summary in part_contract_summary.items():
+    for start_day, summary in contract_summary.items():
         print(f"Start day for key: {start_day}")
         for item in summary:
-            print(f"Contract work time: {item[0]}, holiday time: {item[1]}")
-
-
-def test_perfect_query(perfect_query):
-    for a, jc, jh, w in perfect_query:
-        print(f"{a.WORKDAY}, {jc.CONTRACT_CODE}, {jh.HOLIDAY_TIME}")
+            print(f"{item[0]}: work time: {item[1]}, holiday time: {item[2]}")
 
 
 @pytest.mark.skip
+def test_perfect_query(perfect_query):
+    for a, jc, jh, w in perfect_query:
+        print(f"{a.WORKDAY}, {jc.CONTRACT_CODE}, {jc.PART_WORKTIME}, {jh.HOLIDAY_TIME}")
+
+
+# @pytest.mark.skip
 def test_collect_calculation_attend():
-    test_result = collect_calculation_attend(20)
-    for key, value in test_result.items():
-        print(f"Seperation: {key}")
-        print(f"Series data: {value}")
+    result_dict = collect_calculation_attend(135)
+    for key, value in result_dict.items():
+        print(f"Date type key: {key}")
+        print(f"Series value: {value}")
+    # print(collect_calculation_attend(189))
