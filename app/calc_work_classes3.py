@@ -26,14 +26,15 @@ class CalcTimeClass:
     )
 
     def __post_init__(self, staff_id: int):
+        # そして使わなくなった
         # contract_times = ContractTimeClass.get_contract_times(
         #     staff_id, self.from_day, self.to_day
         # )
-
         # self.half_work_time = timedelta(hours=contract_times[0] / 2)
         # self.half_holiday_time = timedelta(hours=contract_times[1] / 2)
         # self.full_work_time = timedelta(hours=contract_times[0])
         # self.full_holiday_time = timedelta(hours=contract_times[1])
+
         self.staff_id = staff_id
         # self.start_day = start_day
         # self.key_end_day = key_end_day

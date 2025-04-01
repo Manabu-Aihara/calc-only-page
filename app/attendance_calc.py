@@ -1,16 +1,16 @@
-from typing import List, Dict, Tuple
-from datetime import date
+from typing import List, Dict, Optional
 from decimal import Decimal, ROUND_HALF_UP
 
 import pandas as pd
 from pandas import Series
 
+from .database_base import session
+from .models import RecordPaidHoliday
 from .calc_work_classes3 import CalcTimeClass, output_rest_time
 
 
 def calc_attendance_of_term(
-    setting_time: CalcTimeClass,
-    group_data_list: list,
+    setting_time: CalcTimeClass, group_data_list: list, staff_id: int
 ) -> Series:
     pds = pd.Series
 
@@ -74,6 +74,10 @@ def calc_attendance_of_term(
     # 【項目29】中抜け
     halfway_through: int = 0
 
+    # パートタイム契約（CONTRACT_CODE == 2）の場合の代替時間
+    alternative_holiday = session.get(RecordPaidHoliday, staff_id)
+    paid_holiday_time = alternative_holiday.BASETIMES_PAIDHOLIDAY
+
     # Tuple[Attendance, StaffJobContract, StaffHolidayContract, float]
     for (
         one_person_attendance,
@@ -81,6 +85,11 @@ def calc_attendance_of_term(
         holiday_contract,
         work_time,
     ) in group_data_list:
+        contract_holiday_time = (
+            paid_holiday_time
+            if holiday_contract is None
+            else holiday_contract.HOLIDAY_TIME
+        )
 
         on_call_holiday_cnt += (
             1
@@ -177,9 +186,13 @@ def calc_attendance_of_term(
                 one_person_attendance.HOLIDAY,
             )
         else:
+            error_message = f"There is not D_JOB_HISTORY.PART_WORKTIME of {staff_id}"
+            if job_contract.PART_WORKTIME is None:
+                raise TypeError(error_message)
+
             setting_time.set_data(
                 job_contract.PART_WORKTIME,
-                holiday_contract.HOLIDAY_TIME,
+                contract_holiday_time,
                 one_person_attendance.STARTTIME,
                 one_person_attendance.ENDTIME,
                 (
@@ -319,6 +332,7 @@ def calc_attendance_of_term(
             "時間休",
             "中抜け",
         ],
+        name=one_person_attendance.WORKDAY,
     )
 
     return result_series

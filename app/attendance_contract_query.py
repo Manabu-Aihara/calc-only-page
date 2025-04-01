@@ -7,7 +7,6 @@ from .database_base import session
 from .models import (
     Attendance,
     Contract,
-    RecordPaidHoliday,
     StaffJobContract,
     StaffHolidayContract,
 )
@@ -45,7 +44,7 @@ class ContractTimeAttendance:
         return attendance_filters
 
     def get_atendance_of_term(self):
-        # 一人の（基本）2年間の出退勤
+        # 一人の（基本）2年間の出退勤 テスト用
         need_to_filters = self._get_filter()
         return session.query(Attendance).filter(and_(*need_to_filters))
 
@@ -131,8 +130,7 @@ class ContractTimeAttendance:
             .filter(
                 and_(
                     *base_filters,
-                    # StaffJobContract.END_DAY > self.filter_from_day,
-                    # StaffHolidayContract.END_DAY > self.filter_from_day,
+                    # Attendance.WORKDAY >= self.filter_from_day,
                 )
             )
         )
