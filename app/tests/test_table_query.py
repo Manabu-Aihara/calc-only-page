@@ -1,15 +1,19 @@
 import pytest
+from pytest_mock import MockFixture
 from typing import Dict, List
 from datetime import date
 from itertools import groupby
 
-from app.models import StaffHolidayContract
 from app.attendance_contract_query import ContractTimeAttendance
-from app.result_collect_lib import collect_calculation_attend
+from app.result_collect_lib import (
+    collect_calculation_attend,
+    extract_row,
+    put_vertical_dataframe,
+)
 
 
-from_day = date(2023, 4, 1)
-to_day = date(2025, 3, 31)
+from_day = date(2024, 11, 1)
+to_day = date(2025, 2, 28)
 
 
 @pytest.fixture
@@ -63,9 +67,25 @@ def test_perfect_query(perfect_query):
 
 
 # @pytest.mark.skip
-def test_collect_calculation_attend():
-    result_dict = collect_calculation_attend(135)
+def test_collect_calculation_attend(mocker: MockFixture):
+    mock_date = mocker.patch(
+        "app.result_collect_lib.config_from_to", return_value=(from_day, to_day)
+    )
+    result_dict = collect_calculation_attend(194)
     for key, value in result_dict.items():
         print(f"Date type key: {key}")
         print(f"Series value: {value}")
-    # print(collect_calculation_attend(189))
+    # extracted_row = extract_row(result_dict)
+    # print(extracted_row)
+
+    assert mock_date.called
+
+
+@pytest.mark.skip
+def test_put_vertical_dataframe(mocker: MockFixture):
+    mock_date = mocker.patch(
+        "app.result_collect_lib.config_from_to", return_value=(from_day, to_day)
+    )
+    result_df = put_vertical_dataframe(2)
+    print(result_df)
+    assert mock_date.called

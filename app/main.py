@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from . import models
 from .database_base import session, engine
 
-from .series_to_frame import put_vertical_dataframe
+from .result_collect_lib import put_vertical_dataframe
 
 models.Base.metadata.create_all(bind=engine)
 

@@ -1,15 +1,23 @@
 from typing import List, Dict, Tuple, Any
 from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from itertools import groupby
 
 import pandas as pd
 from pandas import Series, DataFrame
 
 from .database_base import session
-from .models import StaffJobContract, StaffHolidayContract
+from .models import StaffJobContract, StaffHolidayContract, User
 from .attendance_contract_query import ContractTimeAttendance
 from .calc_work_classes3 import CalcTimeFactory
 from .attendance_calc import calc_attendance_of_term
+from .users_query_lib import get_conditional_users_query
+
+"""
+    2年遡り、年休に使うので4月、10月
+    @Return:
+        : tuple<date, date> 契約労働（時間）、契約休暇（時間）
+    """
 
 
 def config_from_to() -> Tuple[date, date]:
@@ -24,6 +32,16 @@ def config_from_to() -> Tuple[date, date]:
         return from_day4, to_day4
 
 
+"""
+    入職日及び、契約休暇初日を返す
+    @Params:
+        : int 対象スタッフ
+        : StaffJobContract | StaffHolidayContract
+    @Return:
+        : date | None パートでなければ、None
+    """
+
+
 def get_in_day(
     staff_id: int, contract_table: StaffJobContract | StaffHolidayContract
 ) -> date | None:
@@ -36,8 +54,17 @@ def get_in_day(
     return in_day_query.START_DAY if in_day_query is not None else None
 
 
+"""
+    @Param:
+        : int 対象スタッフ
+    @Return:
+        : dict<str, Series>
+    """
+
+
 def collect_calculation_attend(staff_id: int) -> dict:
     from_day, to_day = config_from_to()
+    # 入職2年未満なら、get_in_day
     demand_from_day = (
         get_in_day(staff_id, StaffJobContract)
         if from_day < get_in_day(staff_id, StaffJobContract)
@@ -47,20 +74,23 @@ def collect_calculation_attend(staff_id: int) -> dict:
     # 諸々計算クラスファクトリー
     calc_time_factory = CalcTimeFactory()
     # 結果物初期化
-    calculation_dict: Dict[Any, Series] = {}
+    calculation_dict: Dict[str, Series] = {}
 
+    # クエリーオブジェクト
     attendance_contract_obj = ContractTimeAttendance(
         staff_id=staff_id, filter_from_day=demand_from_day, filter_to_day=to_day
     )
+    # 契約期間ごとの契約労働・休暇時間クエリー
     perfect_queries_of_person = (
         attendance_contract_obj.get_perfect_contract_attendance()
     )
 
-    start_day_key_list = []
-
+    # キーの1個目
     start_day_key_list = [demand_from_day]
     loop_key_index: int = 0
 
+    # groupby 契約期間ごとにSeriesで出してくれる、ユーティリティ関数
+    # 各END_DAY（個数分）をキーにする
     for index_, groups in groupby(
         perfect_queries_of_person,
         lambda x: (x[1].END_DAY, x[2].END_DAY) if x[2] is not None else x[1].END_DAY,
@@ -72,10 +102,40 @@ def collect_calculation_attend(staff_id: int) -> dict:
             calculation_instance, group_list, staff_id
         )
 
-        start_day_key_list.append(calculation_series.name + timedelta(days=1))
+        # 2個目以降のキー名は、契約期間の最終勤務日の翌月の1日
+        tmp_next_month: date = calculation_series.name + relativedelta(months=1)
+        update_date = tmp_next_month.replace(day=1)
+        start_day_key_list.append(update_date)
 
-        calculation_dict[f"{start_day_key_list[loop_key_index]}"] = calculation_series
+        calculation_dict[f"{staff_id}: {start_day_key_list[loop_key_index]}"] = (
+            calculation_series
+        )
         loop_key_index += 1
 
     print(f"Key list: {start_day_key_list}")
     return calculation_dict
+
+
+def extract_row(dict_data: dict) -> DataFrame:
+    conv_df = pd.DataFrame(data=dict_data)
+    return conv_df.iloc[[0, 1, 9, 10, 11, 23, 24]]
+
+
+def put_vertical_dataframe(part_flag: int) -> DataFrame:
+    request_flag: bool = False if part_flag == 1 else True
+    target_users: List[Tuple[User, int]] = get_conditional_users_query(
+        part_time_flag=request_flag
+    )
+    df_list: List[DataFrame] = []
+    columns = []
+    for target_user, contract in target_users:
+        dict_calc_data = collect_calculation_attend(target_user.STAFFID)
+        need_row = extract_row(dict_data=dict_calc_data)
+        df_list.append(need_row)
+        columns.append(target_user.STAFFID)
+
+    print(f"Column title: {columns}")
+    print(f"What are shape and index?: {[(df.shape, df.index) for df in df_list]}")
+    return pd.concat(df_list, axis=1)
+    # 単体テストのときは、こちらがおすすめ
+    # return pd.concat(df_list, axis=1).T

@@ -50,6 +50,7 @@ def get_more_condition_users(
 
 def get_conditional_users_query(part_time_flag: bool) -> list:
     filter_item = []
+    # 次回（4月2日）ここのところやめる
     (
         filter_item.append(StaffJobContract.CONTRACT_CODE != 2)
         if part_time_flag is False

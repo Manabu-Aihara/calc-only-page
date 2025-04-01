@@ -8,6 +8,16 @@ from .database_base import session
 from .models import RecordPaidHoliday
 from .calc_work_classes3 import CalcTimeClass, output_rest_time
 
+"""
+    集計結果をSeriesで
+    @Params:
+        : CalcTimeClass 各種計算クラスオブジェクト
+        : list 契約期間ごとのクエリー各種、中タプル
+        : int
+    @Return:
+        : Series
+    """
+
 
 def calc_attendance_of_term(
     setting_time: CalcTimeClass, group_data_list: list, staff_id: int
@@ -85,6 +95,7 @@ def calc_attendance_of_term(
         holiday_contract,
         work_time,
     ) in group_data_list:
+        # DBの、入職日から契約休暇（D_HOLIDAY_HISTORY.START_DAY）まで間があるため
         contract_holiday_time = (
             paid_holiday_time
             if holiday_contract is None
@@ -281,8 +292,18 @@ def calc_attendance_of_term(
         timeoff += sum_dict.get("Off")
         halfway_through += sum_dict.get("Through")
 
+    if job_contract.CONTRACT_CODE != 2:
+        disp_work_time, disp_holiday_time = work_time, work_time
+    else:
+        disp_work_time, disp_holiday_time = (
+            job_contract.PART_WORKTIME,
+            contract_holiday_time,
+        )
+
     result_series = pds(
         [
+            disp_work_time,
+            disp_holiday_time,
             on_call_cnt,
             on_call_holiday_cnt,
             on_call_correspond_cnt,
@@ -308,6 +329,8 @@ def calc_attendance_of_term(
             halfway_through,
         ],
         index=[
+            "契約労働（時間）",
+            "契約休暇（時間）",
             "オンコール平日担当回数",
             "オンコール土日担当回数",
             "オンコール対応件数",
