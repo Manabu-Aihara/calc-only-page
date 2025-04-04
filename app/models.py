@@ -10,7 +10,7 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
 )
 from sqlalchemy.orm import relationship
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from .database_base import Base
 
@@ -264,6 +264,9 @@ class StaffLogin(Base):
         self.STAFFID = STAFFID
         self.PASSWORD_HASH = generate_password_hash(PASSWORD)
         self.ADMIN = ADMIN
+
+    def check_password(self, PASSWORD):
+        return check_password_hash(self.PASSWORD_HASH, PASSWORD)
 
 
 class Attendance(Base):

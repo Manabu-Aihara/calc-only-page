@@ -4,6 +4,8 @@ from datetime import date
 from sqlalchemy import and_, or_
 
 from .database_base import session
+
+# from .database_async import get_session
 from .models import (
     Attendance,
     Contract,
@@ -105,6 +107,7 @@ class ContractTimeAttendance:
     def get_perfect_contract_attendance(self):
         base_filters = self._get_base_filter()
 
+        # with get_session() as session:
         member_calc_for_queries = (
             session.query(
                 Attendance, StaffJobContract, StaffHolidayContract, Contract.WORKTIME

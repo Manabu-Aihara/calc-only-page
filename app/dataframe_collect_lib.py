@@ -103,9 +103,11 @@ def collect_calculation_attend(staff_id: int) -> dict:
         )
 
         # 2個目以降のキー名は、契約期間の最終勤務日の翌月の1日
-        tmp_next_month: date = calculation_series.name + relativedelta(months=1)
-        update_date = tmp_next_month.replace(day=1)
-        start_day_key_list.append(update_date)
+        # tmp_next_month: date = calculation_series.name + relativedelta(months=1)
+        # update_date = tmp_next_month.replace(day=1)
+        # 🙆月途中の契約変更もあり得るのでこっち
+        # 2個目以降のキー名は、契約期間の最終勤務日+1
+        start_day_key_list.append(calculation_series.name + relativedelta(days=1))
 
         calculation_dict[f"{staff_id}: {start_day_key_list[loop_key_index]}"] = (
             calculation_series
@@ -121,14 +123,13 @@ def extract_row(dict_data: dict) -> DataFrame:
     return conv_df.iloc[[0, 1, 9, 10, 11, 23, 24]]
 
 
-def put_vertical_dataframe(part_flag: int) -> DataFrame:
-    request_flag: bool = False if part_flag == 1 else True
+def put_vertical_dataframe(team_code: int) -> DataFrame:
     target_users: List[Tuple[User, int]] = get_conditional_users_query(
-        part_time_flag=request_flag
+        team_code=team_code
     )
     df_list: List[DataFrame] = []
     columns = []
-    for target_user, contract in target_users:
+    for target_user, team in target_users:
         dict_calc_data = collect_calculation_attend(target_user.STAFFID)
         need_row = extract_row(dict_data=dict_calc_data)
         df_list.append(need_row)

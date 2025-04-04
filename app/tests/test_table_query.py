@@ -12,7 +12,7 @@ from app.result_collect_lib import (
 )
 
 
-from_day = date(2024, 11, 1)
+from_day = date(2024, 3, 1)
 to_day = date(2025, 2, 28)
 
 
@@ -71,7 +71,7 @@ def test_collect_calculation_attend(mocker: MockFixture):
     mock_date = mocker.patch(
         "app.result_collect_lib.config_from_to", return_value=(from_day, to_day)
     )
-    result_dict = collect_calculation_attend(194)
+    result_dict = collect_calculation_attend(210)
     for key, value in result_dict.items():
         print(f"Date type key: {key}")
         print(f"Series value: {value}")

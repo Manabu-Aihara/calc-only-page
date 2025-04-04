@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import TypeVar
 
 from .database_base import session
-from .models import User, StaffJobContract
+from .models import User, Team
 
 """
     第2引数（退職日）が今日を過ぎていても、今月なら対象とする
@@ -48,19 +48,11 @@ def get_more_condition_users(
     return result_data_list
 
 
-def get_conditional_users_query(part_time_flag: bool) -> list:
-    filter_item = []
-    # 次回（4月2日）ここのところやめる
-    (
-        filter_item.append(StaffJobContract.CONTRACT_CODE != 2)
-        if part_time_flag is False
-        else filter_item.append(StaffJobContract.CONTRACT_CODE == 2)
-    )
+def get_conditional_users_query(team_code: int) -> list[User, Team]:
     users_without_condition = (
-        session.query(User, StaffJobContract.CONTRACT_CODE)
-        .join(StaffJobContract, StaffJobContract.STAFFID == User.STAFFID)
-        .filter(*filter_item)
-        # .group_by(StaffJobContract.CONTRACT_CODE)
+        session.query(User, Team)
+        .join(Team, Team.CODE == User.TEAM_CODE)
+        .filter(Team.CODE == team_code)
         .all()
     )
     return get_more_condition_users(users_without_condition)
