@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from typing import Union
+import requests
 
 from jose import jwt
-from fastapi import Depends, FastAPI, HTTPException, status, Request
+from fastapi import Depends, FastAPI, HTTPException, status, Request, Response
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.exceptions import RequestValidationError
@@ -11,7 +12,6 @@ from pydantic import BaseModel
 
 from .database_base import session
 from .models import StaffLogin
-from .dataframe_collect_lib import put_vertical_dataframe
 
 # パスワード（およびハッシュ化）によるOAuth2、JWTトークンによるBearer
 # https://fastapi.tiangolo.com/ja/tutorial/security/oauth2-jwt/#jwt_1
@@ -78,11 +78,11 @@ async def decord_token_data(token: str):
     except JWTClaimsError as e:
         print(f"Pass 2: {e}")
         raise credentials_exception
-    user = get_user(user_id=user_id)
-    if user is None:
+    # user = get_user(user_id=user_id)
+    if user_id is None:
         print("Pass 3")
         raise credentials_exception
-    return user
+    return user_id
 
 
 # トークン認証、テスト用
@@ -104,13 +104,65 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")
 
 
-@app.post("/users/me")
-async def read_users_me(
-    token: str,
-    current_user: StaffLogin = Depends(dependency=decord_token_data),
-):
-    # return current_user, token
-    return RedirectResponse(f"/frame-data/{current_user.STAFFID}")
+@app.get("/users/me")
+async def read_users_me(request: Request):
+    param_token = request.query_params.get("token")
+    if not param_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Token is missing"
+        )
+
+    # トークンを一時的に保存
+    token_store[param_token] = param_token
+
+    # リダイレクト時にトークンIDのみを渡す
+    return RedirectResponse(
+        url=f"/receive-data?token_id={param_token}",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+token_store = {}
+
+
+@app.get("/receive-data")
+async def receive_data(request: Request):
+    token_id = request.query_params.get("token_id")
+    if not token_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Token ID is missing"
+        )
+
+    # 保存されたトークンを取得
+    token = token_store.get(token_id)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token ID"
+        )
+
+    # トークンを検証
+    try:
+        user_id = await decord_token_data(token)
+        # 使用済みトークンを削除
+        del token_store[token_id]
+        return {"user_id": user_id}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
+
+
+# @app.post("/users/me")
+# async def read_users_me(request: Request, response: Response):
+#     param_token = request.query_params.get("token")
+#     # return param_token
+#     data = token_store.get(param_token)  # トークンIDからデータを取得
+#     if data:
+#         response.headers["X-Data-Token"] = data  # ヘッダーにトークンを設定
+#         del token_store[param_token]  # 一度使用したら削除
+#         return {"message": "データを受け取りました"}
+#     else:
+#         return {"message": "トークンが見つかりません"}
 
 
 # @app.exception_handler(RequestValidationError)
@@ -119,10 +171,8 @@ async def read_users_me(
 #     return JSONResponse(content={}, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
-@app.get("/frame-data/{user_id}")
-def get_calclated_data(
-    user_id: int,
-    current_user: StaffLogin = Depends(dependency=decord_token_data),
-):
-    result_df = put_vertical_dataframe(team_code=2)
-    return result_df.to_dict(), user_id
+# @app.get("/frame-data/{user_id}")
+# def get_calclated_data(
+#     request: Request,
+#     current_user_id: StaffLogin = Depends(dependency=decord_token_data),
+# ):

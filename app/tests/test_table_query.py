@@ -5,7 +5,7 @@ from datetime import date
 from itertools import groupby
 
 from app.attendance_contract_query import ContractTimeAttendance
-from app.result_collect_lib import (
+from app.dataframe_collect_lib import (
     collect_calculation_attend,
     extract_row,
     put_vertical_dataframe,

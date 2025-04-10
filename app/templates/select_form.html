@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Select team to display</title>
+</head>
+
+<body>
+    <p>現在{{ name }}さんが利用中です</p>
+    <form method="post" action="collect-members-data">
+        <select name="team_number">
+            {% for team_num in team_nums %}
+            <option value="{{ team_num.CODE }}">{{ team_num.CODE }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="表示">
+    </form>
+</body>
+
+</html>
