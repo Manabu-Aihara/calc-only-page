@@ -7,11 +7,12 @@
 
 <body>
     <p>現在{{ name }}さんが利用中です</p>
-    <form method="post" action="collect-members-data">
+    <form method="post" action="collect-members-html">
         <select name="team_number">
             {% for team_num in team_nums %}
             <option value="{{ team_num.CODE }}">{{ team_num.CODE }}</option>
             {% endfor %}
+            <input type="text" name="form_token" value="{{ new_token }}" />
         </select>
         <input type="submit" value="表示">
     </form>
