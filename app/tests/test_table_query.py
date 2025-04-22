@@ -10,6 +10,7 @@ from app.dataframe_collect_lib import (
     extract_row,
     put_vertical_dataframe,
 )
+from app import models
 
 
 from_day = date(2024, 3, 1)
@@ -66,7 +67,7 @@ def test_perfect_query(perfect_query):
         print(f"{a.WORKDAY}, {jc.CONTRACT_CODE}, {jc.PART_WORKTIME}, {jh.HOLIDAY_TIME}")
 
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_collect_calculation_attend(mocker: MockFixture):
     mock_date = mocker.patch(
         "app.result_collect_lib.config_from_to", return_value=(from_day, to_day)
@@ -75,8 +76,8 @@ def test_collect_calculation_attend(mocker: MockFixture):
     for key, value in result_dict.items():
         print(f"Date type key: {key}")
         print(f"Series value: {value}")
-    # extracted_row = extract_row(result_dict)
-    # print(extracted_row)
+    extracted_row = extract_row(result_dict)
+    print(extracted_row)
 
     assert mock_date.called
 
@@ -89,3 +90,7 @@ def test_put_vertical_dataframe(mocker: MockFixture):
     result_df = put_vertical_dataframe(2)
     print(result_df)
     assert mock_date.called
+
+
+def test_look_models():
+    print(models.__dict__)

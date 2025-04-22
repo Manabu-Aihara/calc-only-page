@@ -46,11 +46,12 @@ class User(Base):
     DISTANCE = Column(Float, index=True, nullable=True)
     REMARK = Column(String(100), index=True, nullable=True)
     DISPLAY = Column(Boolean, index=True, nullable=False)
-    login = relationship("StaffLogin", backref="user")
-    job_contract = relationship("StaffJobContract", backref="user")
-    holiday_contract = relationship("StaffHolidayContract", backref="user")
-    paid_holiday = relationship("RecordPaidHoliday", backref="user")
-    # count_totalling = relationship("TableOfCount", backref="user")
+    login = relationship("StaffLogin", backref="M_STAFFINFO")
+    job_contract = relationship("StaffJobContract", backref="M_STAFFINFO")
+    holiday_contract = relationship("StaffHolidayContract", backref="M_STAFFINFO")
+    paid_holiday = relationship("RecordPaidHoliday", backref="M_STAFFINFO")
+    approval = relationship("Approval", backref="M_STAFFINFO")
+    notification_list = relationship("NotificationList", backref="M_STAFFINFO")
 
     def __init__(self, STAFFID):
         self.STAFFID = STAFFID
@@ -94,7 +95,7 @@ class CollateralTemplate(Base):
 #     )
 #     JOBTYPE_CODE = Column(Integer, index=True, nullable=False)
 #     CONTRACT_CODE = Column(Integer, index=True, nullable=False)
-#
+
 #     def __init__(
 #         self, STAFFID, JOBTYPE_CODE, CONTRACT_CODE, PART_WORKTIME, START_DAY, END_DAY
 #     ):
@@ -150,8 +151,8 @@ class StaffJobContract(Base):
         "CollateralTemplate", foreign_keys=[CONTRACT_CODE], uselist=True
     )
 
-    PART_WORKTIME = Column(Float, index=True, nullable=False)
-    START_DAY = Column(Date, index=True, nullable=True)
+    PART_WORKTIME = Column(Float, index=True, nullable=True)
+    START_DAY = Column(Date, index=True, nullable=False)
     END_DAY = Column(Date, index=True, nullable=True)
 
     # timecard_template = relationship(
@@ -175,7 +176,7 @@ class StaffJobContract(Base):
 class StaffHolidayContract(Base):
     __tablename__ = "D_HOLIDAY_HISTORY"
     # 複合主キー！重複でも表示させるため、START_DAYを加える
-    __table_args__ = (PrimaryKeyConstraint("STAFFID", "HOLIDAY_TIME", "START_DAY"),)
+    __table_args__ = (PrimaryKeyConstraint("STAFFID", "START_DAY"),)
 
     STAFFID = Column(
         Integer,
@@ -184,7 +185,7 @@ class StaffHolidayContract(Base):
         nullable=False,
     )
     HOLIDAY_TIME = Column(Integer, index=True, nullable=False)
-    START_DAY = Column(Date, index=True, nullable=True)
+    START_DAY = Column(Date, index=True, nullable=False)
     END_DAY = Column(Date, index=True, nullable=True)
 
     def __init__(self, STAFFID, HOLIDAY_TIME, START_DAY, END_DAY):
@@ -208,6 +209,8 @@ class Team(Base):
     CODE = Column(Integer, primary_key=True, index=True, nullable=False)
     NAME = Column(String(50), index=True, nullable=False)
     SHORTNAME = Column(String(50), index=True, nullable=False)
+    todo = relationship("TodoORM", backref="M_TEAM")
+    event = relationship("EventORM", backref="M_TEAM")
 
     def __init__(self, CODE):
         self.CODE = CODE
@@ -248,7 +251,6 @@ class Post(Base):
 class StaffLogin(Base):
     __tablename__ = "M_LOGGININFO"
     id = Column(Integer, primary_key=True)
-    # login = relationship("User", backref="user")
     STAFFID = Column(
         Integer,
         ForeignKey("M_STAFFINFO.STAFFID"),
@@ -258,7 +260,8 @@ class StaffLogin(Base):
     )
     PASSWORD_HASH = Column(String(128), index=True, nullable=True)
     ADMIN = Column(Boolean, index=True, nullable=True)
-    attendance = relationship("Attendance", backref="login_user")
+    attendance = relationship("Attendance", backref="M_LOGGININFO")
+    event = relationship("EventORM", backref="M_LOGGININFO")
 
     def __init__(self, STAFFID, PASSWORD, ADMIN):
         self.STAFFID = STAFFID
@@ -286,6 +289,7 @@ class Attendance(Base):
     OVERTIME = Column(String(32), index=True, nullable=True)  # 残業時間申請
     ALCOHOL = Column(Integer, index=True, nullable=True)
     REMARK = Column(String(100), index=True, nullable=True)  # 備考
+    table_count = relationship("TableOfCount", backref="M_ATTENDANCE")
 
     def __init__(
         self,
@@ -342,6 +346,7 @@ class RecordPaidHoliday(Base):  # 年休関連
     WORK_TIME = Column(Float, index=True, nullable=True)  # 職員勤務時間
     BASETIMES_PAIDHOLIDAY = Column(Float, index=True, nullable=True)  # 規定の年休時間
     ACQUISITION_TYPE = Column(String(1))  # 年休付与タイプ
+    holiday_log = relationship("PaidHolidayLog", backref="M_RECORD_PAIDHOLIDAY")
 
     def __init__(self, STAFFID):
         self.STAFFID = STAFFID
@@ -350,10 +355,9 @@ class RecordPaidHoliday(Base):  # 年休関連
 class TableOfCount(Base):
     __tablename__ = "M_TABLE_OF_COUNTER"
     id = Column(String(15), primary_key=True)
-    # count_totalling = relationship("User", backref="user")
     STAFFID = Column(
         Integer,
-        # ForeignKey("M_STAFFINFO.STAFFID"),
+        ForeignKey("M_ATTENDANCE.STAFFID"),
         index=True,
         nullable=False,
     )

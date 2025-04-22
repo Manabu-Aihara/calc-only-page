@@ -1,0 +1,1008 @@
+-- phpMyAdmin SQL Dump
+-- version 5.1.1deb5ubuntu1
+-- https://www.phpmyadmin.net/
+--
+-- ホスト: localhost:3306
+-- 生成日時: 2023 年 9 月 07 日 14:20
+-- サーバのバージョン： 8.0.34-0ubuntu0.22.04.1
+-- PHP のバージョン: 8.1.2-1ubuntu2.14
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- データベース: `local_cat_db`
+--
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `D_COUNTER_FOR_TABLE`
+--
+
+CREATE TABLE `D_COUNTER_FOR_TABLE` (
+  `STAFFID` int NOT NULL,
+  `ONCALL` int DEFAULT NULL,
+  `ONCALL_HOLIDAY` int DEFAULT NULL,
+  `ONCALL_COUNT` int DEFAULT NULL,
+  `ENGEL_COUNT` int DEFAULT NULL,
+  `NENKYU` int DEFAULT NULL,
+  `NENKYU_HALF` int DEFAULT NULL,
+  `TIKOKU` int DEFAULT NULL,
+  `SOUTAI` int DEFAULT NULL,
+  `KEKKIN` int DEFAULT NULL,
+  `SYUTTYOU` int DEFAULT NULL,
+  `SYUTTYOU_HALF` int DEFAULT NULL,
+  `REFLESH` int DEFAULT NULL,
+  `MILEAGE` float DEFAULT NULL,
+  `SUM_WORKTIME` float DEFAULT NULL,
+  `SUM_REAL_WORKTIME` float DEFAULT NULL,
+  `OVERTIME` float DEFAULT NULL,
+  `HOLIDAY_WORK` float DEFAULT NULL,
+  `WORKDAY_COUNT` int DEFAULT NULL,
+  `SUM_WORKTIME_10` float DEFAULT NULL,
+  `OVERTIME_10` float DEFAULT NULL,
+  `HOLIDAY_WORK_10` float DEFAULT NULL,
+  `TIMEOFF` int DEFAULT NULL,
+  `HALFWAY_THROUGH` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `D_COUNT_ATTENDANCE`
+--
+
+CREATE TABLE `D_COUNT_ATTENDANCE` (
+  `STAFFID` int NOT NULL,
+  `MONTH_4` float DEFAULT NULL,
+  `MONTH_5` float DEFAULT NULL,
+  `MONTH_6` float DEFAULT NULL,
+  `MONTH_7` float DEFAULT NULL,
+  `MONTH_8` float DEFAULT NULL,
+  `MONTH_9` float DEFAULT NULL,
+  `MONTH_10` float DEFAULT NULL,
+  `MONTH_11` float DEFAULT NULL,
+  `MONTH_12` float DEFAULT NULL,
+  `MONTH_1` float DEFAULT NULL,
+  `MONTH_2` float DEFAULT NULL,
+  `MONTH_3` float DEFAULT NULL,
+  `MONTH_HOLIDAY_4` float DEFAULT NULL,
+  `MONTH_HOLIDAY_5` float DEFAULT NULL,
+  `MONTH_HOLIDAY_6` float DEFAULT NULL,
+  `MONTH_HOLIDAY_7` float DEFAULT NULL,
+  `MONTH_HOLIDAY_8` float DEFAULT NULL,
+  `MONTH_HOLIDAY_9` float DEFAULT NULL,
+  `MONTH_HOLIDAY_10` float DEFAULT NULL,
+  `MONTH_HOLIDAY_11` float DEFAULT NULL,
+  `MONTH_HOLIDAY_12` float DEFAULT NULL,
+  `MONTH_HOLIDAY_1` float DEFAULT NULL,
+  `MONTH_HOLIDAY_2` float DEFAULT NULL,
+  `MONTH_HOLIDAY_3` float DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `D_HOLIDAY_HISTORY`
+--
+
+CREATE TABLE `D_HOLIDAY_HISTORY` (
+  `STAFFID` int NOT NULL,
+  `HOLIDAY_TIME` float DEFAULT NULL COMMENT '年休時間',
+  `START_DAY` date DEFAULT NULL COMMENT '適用開始日',
+  `END_DAY` date DEFAULT NULL COMMENT '適用終了日'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `D_JOB_HISTORY`
+--
+
+CREATE TABLE `D_JOB_HISTORY` (
+  `STAFFID` int NOT NULL,
+  `JOBTYPE_CODE` int NOT NULL,
+  `CONTACT_CODE` int NOT NULL COMMENT '契約コード',
+  `PART_WORKTIME` float DEFAULT NULL,
+  `START_DAY` date DEFAULT NULL COMMENT '適用開始日',
+  `END_DAY` date DEFAULT NULL COMMENT '適用終了日'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `D_NOTIFICATION_LIST`
+--
+
+CREATE TABLE `D_NOTIFICATION_LIST` (
+  `id` int NOT NULL,
+  `STAFFID` int NOT NULL,
+  `NOTICE_DAYTIME` datetime DEFAULT NULL,
+  `N_CODE` int NOT NULL,
+  `STATUS` int NOT NULL,
+  `START_DAY` date NOT NULL,
+  `START_TIME` time DEFAULT NULL,
+  `END_DAY` date DEFAULT NULL,
+  `END_TIME` time DEFAULT NULL,
+  `REMARK` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- テーブルのデータのダンプ `D_NOTIFICATION_LIST`
+--
+
+INSERT INTO `D_NOTIFICATION_LIST` (`id`, `STAFFID`, `NOTICE_DAYTIME`, `N_CODE`, `STATUS`, `START_DAY`, `START_TIME`, `END_DAY`, `END_TIME`, `REMARK`) VALUES
+(2, 20, '2023-07-10 13:33:42', 1, 0, '2023-07-31', '09:00:00', '2023-07-31', '13:00:00', 'ドラクエ発売日'),
+(3, 30, '2023-06-20 13:33:42', 8, 0, '2023-07-28', '22:22:42', '2023-07-31', '22:22:42', 'ヤギが逃げた'),
+(4, 30, NULL, 8, 0, '2023-07-28', '22:24:34', '2023-07-31', '22:24:34', '軒下の雪で'),
+(5, 20, NULL, 8, 1, '2023-08-24', NULL, '2023-08-24', NULL, '毒キノコを食べた'),
+(6, 20, NULL, 3, 1, '2023-08-31', NULL, '2023-08-31', NULL, '年休消化'),
+(7, 201, '2023-07-24 15:15:31', 3, 2, '2023-08-25', NULL, '2023-08-25', NULL, '推し活'),
+(8, 201, NULL, 4, 1, '2023-08-25', '13:00:00', '2023-08-25', '18:00:00', '花火大会'),
+(9, 201, '2023-08-10 13:33:42', 3, 1, '2023-08-17', NULL, '2023-08-17', NULL, '羊の出産'),
+(10, 201, '2023-08-15 15:21:02', 3, 1, '2023-09-01', NULL, '2023-09-01', NULL, '里芋の収穫'),
+(13, 201, '2023-08-17 10:14:43', 7, 1, '2023-08-28', NULL, '2023-08-29', NULL, '酔拳使用による二日酔い'),
+(14, 201, '2023-08-17 10:17:04', 3, 0, '2023-09-01', NULL, '2023-09-01', NULL, 'サモ・ハンに会います'),
+(16, 20, '2023-08-17 15:13:46', 1, 2, '2023-08-18', '09:00:00', '2023-08-18', '13:00:00', 'スキーが合わない'),
+(17, 201, '2023-08-24 13:29:04', 4, 0, '2023-09-13', '13:00:00', '2023-09-13', '18:00:00', 'カンフー修行'),
+(18, 201, '2023-08-24 13:52:37', 7, 0, '2023-09-18', NULL, '2023-09-22', NULL, '香港へ里帰り'),
+(19, 201, '2023-08-24 14:14:43', 2, 0, '2023-08-31', NULL, '2023-08-31', NULL, 'ユンピョウが来ます'),
+(20, 20, '2023-08-24 14:14:43', 8, 1, '2023-08-30', NULL, '2023-08-30', NULL, 'スキー板を間違えた'),
+(21, 201, '2023-08-24 15:10:07', 8, 0, '2023-08-31', NULL, '2023-08-31', NULL, '握手会'),
+(22, 201, '2023-08-24 15:10:07', 8, 0, '2023-08-31', NULL, '2023-08-31', NULL, '握手会'),
+(23, 20, '2023-08-24 15:10:07', 7, 1, '2023-08-31', NULL, '2023-08-31', NULL, '温泉'),
+(24, 20, '2023-08-24 15:15:31', 8, 1, '2023-08-31', NULL, '2023-08-31', NULL, '葛西…'),
+(25, 201, '2023-08-24 15:41:54', 8, 0, '2023-08-31', NULL, '2023-08-31', NULL, 'リフォームします'),
+(27, 20, '2023-08-25 14:17:47', 3, 0, '2023-09-15', NULL, '2023-09-15', NULL, 'お彼岸'),
+(28, 201, '2023-08-29 16:10:27', 20, 0, '2023-09-11', NULL, '2023-09-15', NULL, '撮影でケガしました'),
+(29, 20, '2023-09-01 10:08:55', 3, 2, '2023-09-20', NULL, '2023-09-20', NULL, '頑張ったから'),
+(30, 20, '2023-09-01 10:55:42', 12, 0, '2023-09-15', '13:00:00', NULL, '16:00:00', 'ビュッフェランチ'),
+(31, 20, '2023-09-01 12:14:03', 8, 0, '2023-09-25', '00:00:00', NULL, '00:00:00', 'お腹が痛くなるような…'),
+(32, 20, '2023-09-05 13:02:24', 14, 0, '2023-09-13', '14:00:00', NULL, '16:00:00', 'サウナで整う');
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `D_TIME_ATTENDANCE`
+--
+
+CREATE TABLE `D_TIME_ATTENDANCE` (
+  `STAFFID` int NOT NULL,
+  `TIME_4` float DEFAULT NULL,
+  `TIME_5` float DEFAULT NULL,
+  `TIME_6` float DEFAULT NULL,
+  `TIME_7` float DEFAULT NULL,
+  `TIME_8` float DEFAULT NULL,
+  `TIME_9` float DEFAULT NULL,
+  `TIME_10` float DEFAULT NULL,
+  `TIME_11` float DEFAULT NULL,
+  `TIME_12` float DEFAULT NULL,
+  `TIME_1` float DEFAULT NULL,
+  `TIME_2` float DEFAULT NULL,
+  `TIME_3` float DEFAULT NULL,
+  `TIME_HOLIDAY_4` float DEFAULT NULL,
+  `TIME_HOLIDAY_5` float DEFAULT NULL,
+  `TIME_HOLIDAY_6` float DEFAULT NULL,
+  `TIME_HOLIDAY_7` float DEFAULT NULL,
+  `TIME_HOLIDAY_8` float DEFAULT NULL,
+  `TIME_HOLIDAY_9` float DEFAULT NULL,
+  `TIME_HOLIDAY_10` float DEFAULT NULL,
+  `TIME_HOLIDAY_11` float DEFAULT NULL,
+  `TIME_HOLIDAY_12` float DEFAULT NULL,
+  `TIME_HOLIDAY_1` float DEFAULT NULL,
+  `TIME_HOLIDAY_2` float DEFAULT NULL,
+  `TIME_HOLIDAY_3` float DEFAULT NULL,
+  `OVER_TIME_4` float DEFAULT NULL,
+  `OVER_TIME_5` float DEFAULT NULL,
+  `OVER_TIME_6` float DEFAULT NULL,
+  `OVER_TIME_7` float DEFAULT NULL,
+  `OVER_TIME_8` float DEFAULT NULL,
+  `OVER_TIME_9` float DEFAULT NULL,
+  `OVER_TIME_10` float DEFAULT NULL,
+  `OVER_TIME_11` float DEFAULT NULL,
+  `OVER_TIME_12` float DEFAULT NULL,
+  `OVER_TIME_1` float DEFAULT NULL,
+  `OVER_TIME_2` float DEFAULT NULL,
+  `OVER_TIME_3` float DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_APPROVAL`
+--
+
+CREATE TABLE `M_APPROVAL` (
+  `id` int NOT NULL,
+  `STAFFID` int NOT NULL,
+  `TYPE` varchar(10) NOT NULL,
+  `GROUPNAME` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- テーブルのデータのダンプ `M_APPROVAL`
+--
+
+INSERT INTO `M_APPROVAL` (`id`, `STAFFID`, `TYPE`, `GROUPNAME`) VALUES
+(1, 20, 'skype', 'kari_num');
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_ATTENDANCE`
+--
+
+CREATE TABLE `M_ATTENDANCE` (
+  `id` int NOT NULL,
+  `STAFFID` int DEFAULT NULL,
+  `WORKDAY` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `HOLIDAY` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `STARTTIME` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ENDTIME` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `MILEAGE` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ONCALL` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ONCALL_COUNT` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ENGEL_COUNT` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `NOTIFICATION` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `NOTIFICATION2` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `OVERTIME` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `REMARK` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- テーブルのデータのダンプ `M_ATTENDANCE`
+--
+
+INSERT INTO `M_ATTENDANCE` (`id`, `STAFFID`, `WORKDAY`, `HOLIDAY`, `STARTTIME`, `ENDTIME`, `MILEAGE`, `ONCALL`, `ONCALL_COUNT`, `ENGEL_COUNT`, `NOTIFICATION`, `NOTIFICATION2`, `OVERTIME`, `REMARK`) VALUES
+(32966, 20, '2023-07-01', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32967, 20, '2023-07-02', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32968, 20, '2023-07-03', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32969, 20, '2023-07-04', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32970, 20, '2023-07-05', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32971, 20, '2023-07-06', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32972, 20, '2023-07-07', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32973, 20, '2023-07-08', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32974, 20, '2023-07-09', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32975, 20, '2023-07-10', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32976, 20, '2023-07-11', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32977, 20, '2023-07-12', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32978, 20, '2023-07-13', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32979, 20, '2023-07-14', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32980, 20, '2023-07-15', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32981, 20, '2023-07-16', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32982, 20, '2023-07-17', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32983, 20, '2023-07-18', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32984, 20, '2023-07-19', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32985, 20, '2023-07-20', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32986, 20, '2023-07-21', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32987, 20, '2023-07-22', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32988, 20, '2023-07-23', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32989, 20, '2023-07-24', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32990, 20, '2023-07-25', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32991, 20, '2023-07-26', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32992, 20, '2023-07-27', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32993, 20, '2023-07-28', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32994, 20, '2023-07-29', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32995, 20, '2023-07-30', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32996, 20, '2023-07-31', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32997, 20, '2023-06-01', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32998, 20, '2023-06-02', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(32999, 20, '2023-06-03', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33000, 20, '2023-06-04', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33001, 20, '2023-06-05', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33002, 20, '2023-06-06', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33003, 20, '2023-06-07', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33004, 20, '2023-06-08', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33005, 20, '2023-06-09', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33006, 20, '2023-06-10', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33007, 20, '2023-06-11', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33008, 20, '2023-06-12', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33009, 20, '2023-06-13', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33010, 20, '2023-06-14', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33011, 20, '2023-06-15', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33012, 20, '2023-06-16', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33013, 20, '2023-06-17', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33014, 20, '2023-06-18', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33015, 20, '2023-06-19', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33016, 20, '2023-06-20', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33017, 20, '2023-06-21', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33018, 20, '2023-06-22', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33019, 20, '2023-06-23', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33020, 20, '2023-06-24', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33021, 20, '2023-06-25', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33022, 20, '2023-06-26', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33023, 20, '2023-06-27', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33024, 20, '2023-06-28', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33025, 20, '2023-06-29', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33026, 20, '2023-06-30', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33027, 20, '2023-09-01', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33028, 20, '2023-09-02', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33029, 20, '2023-09-03', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33030, 20, '2023-09-04', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33031, 20, '2023-09-05', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33032, 20, '2023-09-06', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33033, 20, '2023-09-07', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33034, 20, '2023-09-08', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33035, 20, '2023-09-09', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33036, 20, '2023-09-10', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33037, 20, '2023-09-11', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33038, 20, '2023-09-12', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33039, 20, '2023-09-13', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33040, 20, '2023-09-14', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33041, 20, '2023-09-15', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33042, 20, '2023-09-16', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33043, 20, '2023-09-17', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33044, 20, '2023-09-18', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33045, 20, '2023-09-19', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33046, 20, '2023-09-20', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33047, 20, '2023-09-21', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33048, 20, '2023-09-22', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33049, 20, '2023-09-23', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33050, 20, '2023-09-24', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33051, 20, '2023-09-25', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33052, 20, '2023-09-26', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33053, 20, '2023-09-27', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33054, 20, '2023-09-28', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33055, 20, '2023-09-29', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', ''),
+(33056, 20, '2023-09-30', '', '00:00', '00:00', '0.0', '0', '0', '0', '', '', '0', '');
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_CONTRACT`
+--
+
+CREATE TABLE `M_CONTRACT` (
+  `CONTRACT_CODE` int NOT NULL,
+  `NAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_DEPARTMENT`
+--
+
+CREATE TABLE `M_DEPARTMENT` (
+  `CODE` int NOT NULL,
+  `NAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_JOBTYPE`
+--
+
+CREATE TABLE `M_JOBTYPE` (
+  `JOBTYPE_CODE` int NOT NULL,
+  `NAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `SHORTNAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_LOGGININFO`
+--
+
+CREATE TABLE `M_LOGGININFO` (
+  `id` int NOT NULL,
+  `STAFFID` int NOT NULL,
+  `PASSWORD_HASH` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ADMIN` tinyint(1) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- テーブルのデータのダンプ `M_LOGGININFO`
+--
+
+INSERT INTO `M_LOGGININFO` (`id`, `STAFFID`, `PASSWORD_HASH`, `ADMIN`) VALUES
+(20, 20, 'pbkdf2:sha256:260000$7yol2RIdKRnrGXux$91cfa71a707fdfe72715ee48fe38892546d71464a6fab8fc1547db6e0f85cffd', 1),
+(182, 201, 'pbkdf2:sha256:260000$7yol2RIdKRnrGXux$91cfa71a707fdfe72715ee48fe38892546d71464a6fab8fc1547db6e0f85cffd', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_NOTIFICATION`
+--
+
+CREATE TABLE `M_NOTIFICATION` (
+  `CODE` int NOT NULL,
+  `NAME` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- テーブルのデータのダンプ `M_NOTIFICATION`
+--
+
+INSERT INTO `M_NOTIFICATION` (`CODE`, `NAME`) VALUES
+(13, '1h中抜時休'),
+(10, '1h時間休'),
+(14, '2h中抜時休'),
+(11, '2h時間休'),
+(15, '3h中抜時休'),
+(12, '3h時間休'),
+(7, 'リフレッシュ'),
+(19, '介護休暇'),
+(5, '出張全日'),
+(6, '出張半日'),
+(3, '年休全日'),
+(4, '年休半日'),
+(9, '慶弔休暇'),
+(2, '早退'),
+(8, '欠勤'),
+(16, '生理休暇半日'),
+(17, '産前産後'),
+(20, '病気休暇'),
+(18, '育児休暇'),
+(1, '遅刻');
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_POST`
+--
+
+CREATE TABLE `M_POST` (
+  `CODE` int NOT NULL,
+  `NAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_RECORD_PAIDHOLIDAY`
+--
+
+CREATE TABLE `M_RECORD_PAIDHOLIDAY` (
+  `STAFFID` int NOT NULL,
+  `DEPARTMENT_CODE` int DEFAULT NULL,
+  `LNAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `FNAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `LKANA` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `FKANA` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `INDAY` datetime DEFAULT NULL,
+  `LAST_DATEGRANT` datetime DEFAULT NULL,
+  `NEXT_DATEGRANT` datetime DEFAULT NULL,
+  `USED_PAIDHOLIDAY` float DEFAULT NULL,
+  `REMAIN_PAIDHOLIDAY` float DEFAULT NULL,
+  `TEAM_CODE` int DEFAULT NULL,
+  `CONTRACT_CODE` int DEFAULT NULL,
+  `LAST_CARRIEDOVER` float DEFAULT NULL,
+  `ATENDANCE_YEAR` int DEFAULT NULL,
+  `WORK_TIME` float DEFAULT NULL,
+  `BASETIMES_PAIDHOLIDAY` float DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- テーブルのデータのダンプ `M_RECORD_PAIDHOLIDAY`
+--
+
+INSERT INTO `M_RECORD_PAIDHOLIDAY` (`STAFFID`, `DEPARTMENT_CODE`, `LNAME`, `FNAME`, `LKANA`, `FKANA`, `INDAY`, `LAST_DATEGRANT`, `NEXT_DATEGRANT`, `USED_PAIDHOLIDAY`, `REMAIN_PAIDHOLIDAY`, `TEAM_CODE`, `CONTRACT_CODE`, `LAST_CARRIEDOVER`, `ATENDANCE_YEAR`, `WORK_TIME`, `BASETIMES_PAIDHOLIDAY`) VALUES
+(20, NULL, NULL, NULL, NULL, NULL, '2023-07-13 15:50:10', '2023-07-13 15:50:10', '2023-10-01 15:50:10', 0, 1, NULL, NULL, 0, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_STAFFINFO`
+--
+
+CREATE TABLE `M_STAFFINFO` (
+  `STAFFID` int NOT NULL,
+  `DEPARTMENT_CODE` int DEFAULT NULL,
+  `TEAM_CODE` int DEFAULT NULL,
+  `CONTRACT_CODE` int DEFAULT NULL,
+  `JOBTYPE_CODE` int DEFAULT NULL,
+  `POST_CODE` int DEFAULT NULL,
+  `LNAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `FNAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `LKANA` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `FKANA` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `POST` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ADRESS1` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ADRESS2` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `TEL1` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `TEL2` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `BIRTHDAY` datetime DEFAULT NULL,
+  `INDAY` datetime DEFAULT NULL,
+  `OUTDAY` datetime DEFAULT NULL,
+  `STANDDAY` datetime DEFAULT NULL,
+  `SOCIAL_INSURANCE` int DEFAULT NULL,
+  `EMPLOYMENT_INSURANCE` int DEFAULT NULL,
+  `EXPERIENCE` int DEFAULT NULL,
+  `TABLET` int DEFAULT NULL,
+  `SINGLE` int DEFAULT NULL,
+  `SUPPORT` int DEFAULT NULL,
+  `HOUSE` int DEFAULT NULL,
+  `DISTANCE` int DEFAULT NULL,
+  `REMARK` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- テーブルのデータのダンプ `M_STAFFINFO`
+--
+
+INSERT INTO `M_STAFFINFO` (`STAFFID`, `DEPARTMENT_CODE`, `TEAM_CODE`, `CONTRACT_CODE`, `JOBTYPE_CODE`, `POST_CODE`, `LNAME`, `FNAME`, `LKANA`, `FKANA`, `POST`, `ADRESS1`, `ADRESS2`, `TEL1`, `TEL2`, `BIRTHDAY`, `INDAY`, `OUTDAY`, `STANDDAY`, `SOCIAL_INSURANCE`, `EMPLOYMENT_INSURANCE`, `EXPERIENCE`, `TABLET`, `SINGLE`, `SUPPORT`, `HOUSE`, `DISTANCE`, `REMARK`) VALUES
+(20, NULL, NULL, NULL, NULL, NULL, 'ハラダ', 'マサヒコ', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2023-07-13 15:50:10', '2018-07-13 15:50:10', '2023-07-13 15:50:10', '2023-07-13 15:50:10', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(30, NULL, NULL, NULL, NULL, NULL, 'オカベ', 'タカノブ', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2023-08-07 20:45:29', '2023-08-07 20:45:29', '2023-08-07 20:45:29', '2023-08-07 20:45:29', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(201, NULL, NULL, NULL, NULL, NULL, 'Jackie', 'Chen', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2023-08-03 14:32:45', '2023-08-03 14:32:45', '2023-08-03 14:32:45', '2023-08-03 14:32:45', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_SYSTEMINFO`
+--
+
+CREATE TABLE `M_SYSTEMINFO` (
+  `STAFFID` int NOT NULL,
+  `MAIL` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `MAIL_PASS` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `MICRO_PASS` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `PAY_PASS` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `KANAMIC_PASS` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ZOOM_PASS` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- テーブルのデータのダンプ `M_SYSTEMINFO`
+--
+
+INSERT INTO `M_SYSTEMINFO` (`STAFFID`, `MAIL`, `MAIL_PASS`, `MICRO_PASS`, `PAY_PASS`, `KANAMIC_PASS`, `ZOOM_PASS`) VALUES
+(20, 'win_mint.7v903@outlook.jp', 'Imocho_580', NULL, NULL, NULL, NULL),
+(201, 'manabu@yoboiryo.co.jp', 'aihara6644', NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_TEAM`
+--
+
+CREATE TABLE `M_TEAM` (
+  `CODE` int NOT NULL,
+  `NAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `SHORTNAME` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `M_TIMECARD_TEMPLATE`
+--
+
+CREATE TABLE `M_TIMECARD_TEMPLATE` (
+  `id` int NOT NULL,
+  `JOBTYPE_CODE` int DEFAULT NULL,
+  `CONTACT_CODE` int DEFAULT NULL,
+  `TEMPLATE_NO` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- ダンプしたテーブルのインデックス
+--
+
+--
+-- テーブルのインデックス `D_COUNTER_FOR_TABLE`
+--
+ALTER TABLE `D_COUNTER_FOR_TABLE`
+  ADD PRIMARY KEY (`STAFFID`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_HOLIDAY_WORK_10` (`HOLIDAY_WORK_10`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_TIMEOFF` (`TIMEOFF`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_HALFWAY_THROUGH` (`HALFWAY_THROUGH`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_STAFFID` (`STAFFID`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_ONCALL` (`ONCALL`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_ONCALL_COUNT` (`ONCALL_COUNT`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_ONCALL_HOLIDAY` (`ONCALL_HOLIDAY`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_KEKKIN` (`KEKKIN`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_ENGEL_COUNT` (`ENGEL_COUNT`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_NENKYU` (`NENKYU`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_TIKOKU` (`TIKOKU`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_NENKYU_HALF` (`NENKYU_HALF`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_SOUTAI` (`SOUTAI`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_SUM_WORKTIME` (`SUM_WORKTIME`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_SYUTTYOU` (`SYUTTYOU`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_SYUTTYOU_HALF` (`SYUTTYOU_HALF`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_REFLESH` (`REFLESH`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_MILEAGE` (`MILEAGE`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_WORKDAY_COUNT` (`WORKDAY_COUNT`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_OVERTIME` (`OVERTIME`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_HOLIDAY_WORK` (`HOLIDAY_WORK`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_SUM_WORKTIME_10` (`SUM_WORKTIME_10`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_OVERTIME_10` (`OVERTIME_10`),
+  ADD KEY `ix_D_COUNTER_FOR_TABLE_SUM_REAL_WORKTIME` (`SUM_REAL_WORKTIME`) USING BTREE;
+
+--
+-- テーブルのインデックス `D_COUNT_ATTENDANCE`
+--
+ALTER TABLE `D_COUNT_ATTENDANCE`
+  ADD PRIMARY KEY (`STAFFID`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_STAFFID` (`STAFFID`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_4` (`MONTH_4`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_6` (`MONTH_6`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_5` (`MONTH_5`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_7` (`MONTH_7`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_8` (`MONTH_8`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_9` (`MONTH_9`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_10` (`MONTH_10`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_11` (`MONTH_11`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_12` (`MONTH_12`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_1` (`MONTH_1`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_2` (`MONTH_2`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_3` (`MONTH_3`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_4` (`MONTH_HOLIDAY_4`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_5` (`MONTH_HOLIDAY_5`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_6` (`MONTH_HOLIDAY_6`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_7` (`MONTH_HOLIDAY_7`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_8` (`MONTH_HOLIDAY_8`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_9` (`MONTH_HOLIDAY_9`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_10` (`MONTH_HOLIDAY_10`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_11` (`MONTH_HOLIDAY_11`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_12` (`MONTH_HOLIDAY_12`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_1` (`MONTH_HOLIDAY_1`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_2` (`MONTH_HOLIDAY_2`),
+  ADD KEY `ix_D_COUNT_ATTENDANCE_MONTH_HOLIDAY_3` (`MONTH_HOLIDAY_3`);
+
+--
+-- テーブルのインデックス `D_JOB_HISTORY`
+--
+ALTER TABLE `D_JOB_HISTORY`
+  ADD KEY `STAFFID` (`STAFFID`),
+  ADD KEY `JOBTYPE_CODE` (`JOBTYPE_CODE`),
+  ADD KEY `CONTACT_CODE` (`CONTACT_CODE`),
+  ADD KEY `PART_WORKTIME` (`PART_WORKTIME`),
+  ADD KEY `START_DAY` (`START_DAY`),
+  ADD KEY `END_DAY` (`END_DAY`);
+
+--
+-- テーブルのインデックス `D_NOTIFICATION_LIST`
+--
+ALTER TABLE `D_NOTIFICATION_LIST`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- テーブルのインデックス `D_TIME_ATTENDANCE`
+--
+ALTER TABLE `D_TIME_ATTENDANCE`
+  ADD PRIMARY KEY (`STAFFID`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_STAFFID` (`STAFFID`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_5` (`OVER_TIME_5`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_4` (`TIME_4`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_6` (`OVER_TIME_6`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_7` (`OVER_TIME_7`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_6` (`TIME_6`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_5` (`TIME_5`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_8` (`OVER_TIME_8`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_7` (`TIME_7`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_9` (`OVER_TIME_9`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_8` (`TIME_8`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_9` (`TIME_9`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_10` (`OVER_TIME_10`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_10` (`TIME_10`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_11` (`TIME_11`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_11` (`OVER_TIME_11`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_12` (`TIME_12`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_1` (`TIME_1`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_12` (`OVER_TIME_12`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_2` (`TIME_2`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_3` (`TIME_3`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_1` (`OVER_TIME_1`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_4` (`TIME_HOLIDAY_4`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_5` (`TIME_HOLIDAY_5`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_2` (`OVER_TIME_2`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_6` (`TIME_HOLIDAY_6`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_3` (`OVER_TIME_3`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_7` (`TIME_HOLIDAY_7`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_8` (`TIME_HOLIDAY_8`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_9` (`TIME_HOLIDAY_9`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_10` (`TIME_HOLIDAY_10`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_11` (`TIME_HOLIDAY_11`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_12` (`TIME_HOLIDAY_12`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_1` (`TIME_HOLIDAY_1`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_2` (`TIME_HOLIDAY_2`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_TIME_HOLIDAY_3` (`TIME_HOLIDAY_3`),
+  ADD KEY `ix_D_TIME_ATTENDANCE_OVER_TIME_4` (`OVER_TIME_4`);
+
+--
+-- テーブルのインデックス `M_APPROVAL`
+--
+ALTER TABLE `M_APPROVAL`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- テーブルのインデックス `M_ATTENDANCE`
+--
+ALTER TABLE `M_ATTENDANCE`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ix_M_ATTENDANCE_STARTTIME` (`STARTTIME`),
+  ADD KEY `ix_M_ATTENDANCE_REMARK` (`REMARK`),
+  ADD KEY `ix_M_ATTENDANCE_HOLIDAY` (`HOLIDAY`),
+  ADD KEY `ix_M_ATTENDANCE_ENDTIME` (`ENDTIME`),
+  ADD KEY `ix_M_ATTENDANCE_MILEAGE` (`MILEAGE`),
+  ADD KEY `ix_M_ATTENDANCE_ONCALL` (`ONCALL`),
+  ADD KEY `ix_M_ATTENDANCE_STAFFID` (`STAFFID`),
+  ADD KEY `ix_M_ATTENDANCE_ONCALL_COUNT` (`ONCALL_COUNT`),
+  ADD KEY `ix_M_ATTENDANCE_ENGEL_COUNT` (`ENGEL_COUNT`),
+  ADD KEY `ix_M_ATTENDANCE_NOTIFICATION` (`NOTIFICATION`),
+  ADD KEY `ix_M_ATTENDANCE_WORKDAY` (`WORKDAY`),
+  ADD KEY `ix_M_ATTENDANCE_NOTIFICATION2` (`NOTIFICATION2`),
+  ADD KEY `ix_M_ATTENDANCE_OVERTIME` (`OVERTIME`);
+
+--
+-- テーブルのインデックス `M_CONTRACT`
+--
+ALTER TABLE `M_CONTRACT`
+  ADD PRIMARY KEY (`CONTRACT_CODE`) USING BTREE,
+  ADD KEY `ix_M_CONTRACT_NAME` (`NAME`),
+  ADD KEY `ix_M_CONTRACT_CODE` (`CONTRACT_CODE`) USING BTREE;
+
+--
+-- テーブルのインデックス `M_DEPARTMENT`
+--
+ALTER TABLE `M_DEPARTMENT`
+  ADD PRIMARY KEY (`CODE`),
+  ADD KEY `ix_M_DEPARTMENT_NAME` (`NAME`),
+  ADD KEY `ix_M_DEPARTMENT_CODE` (`CODE`);
+
+--
+-- テーブルのインデックス `M_JOBTYPE`
+--
+ALTER TABLE `M_JOBTYPE`
+  ADD PRIMARY KEY (`JOBTYPE_CODE`) USING BTREE,
+  ADD KEY `ix_M_JOBTYPE_SHORTNAME` (`SHORTNAME`),
+  ADD KEY `ix_M_JOBTYPE_NAME` (`NAME`),
+  ADD KEY `ix_M_JOBTYPE_CODE` (`JOBTYPE_CODE`) USING BTREE;
+
+--
+-- テーブルのインデックス `M_LOGGININFO`
+--
+ALTER TABLE `M_LOGGININFO`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ix_M_LOGGININFO_STAFFID` (`STAFFID`),
+  ADD KEY `ix_M_LOGGININFO_PASSWORD_HASH` (`PASSWORD_HASH`),
+  ADD KEY `ix_M_LOGGININFO_ADMIN` (`ADMIN`);
+
+--
+-- テーブルのインデックス `M_NOTIFICATION`
+--
+ALTER TABLE `M_NOTIFICATION`
+  ADD PRIMARY KEY (`CODE`),
+  ADD KEY `ix_M_NOTIFICATION_NAME` (`NAME`),
+  ADD KEY `ix_M_NOTIFICATION_CODE` (`CODE`);
+
+--
+-- テーブルのインデックス `M_POST`
+--
+ALTER TABLE `M_POST`
+  ADD PRIMARY KEY (`CODE`),
+  ADD KEY `ix_M_POST_NAME` (`NAME`),
+  ADD KEY `ix_M_POST_CODE` (`CODE`);
+
+--
+-- テーブルのインデックス `M_RECORD_PAIDHOLIDAY`
+--
+ALTER TABLE `M_RECORD_PAIDHOLIDAY`
+  ADD PRIMARY KEY (`STAFFID`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_FNAME` (`FNAME`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_ATENDANCE_YEAR` (`ATENDANCE_YEAR`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_TEAM_CODE` (`TEAM_CODE`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_LKANA` (`LKANA`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_LAST_CARRIEDOVER` (`LAST_CARRIEDOVER`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_REMAIN_PAIDHOLIDAY` (`REMAIN_PAIDHOLIDAY`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_LNAME` (`LNAME`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_BASETIMES_PAIDHOLIDAY` (`BASETIMES_PAIDHOLIDAY`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_USED_PAIDHOLIDAY` (`USED_PAIDHOLIDAY`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_CONTRACT_CODE` (`CONTRACT_CODE`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_NEXT_DATEGRANT` (`NEXT_DATEGRANT`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_DEPARTMENT_CODE` (`DEPARTMENT_CODE`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_LAST_DATEGRANT` (`LAST_DATEGRANT`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_INDAY` (`INDAY`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_FKANA` (`FKANA`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_STAFFID` (`STAFFID`),
+  ADD KEY `ix_M_RECORD_PAIDHOLIDAY_WORK_TIME` (`WORK_TIME`) USING BTREE;
+
+--
+-- テーブルのインデックス `M_STAFFINFO`
+--
+ALTER TABLE `M_STAFFINFO`
+  ADD PRIMARY KEY (`STAFFID`),
+  ADD KEY `ix_M_STAFFINFO_LKANA` (`LKANA`),
+  ADD KEY `ix_M_STAFFINFO_FKANA` (`FKANA`),
+  ADD KEY `ix_M_STAFFINFO_POST` (`POST`),
+  ADD KEY `ix_M_STAFFINFO_ADRESS1` (`ADRESS1`),
+  ADD KEY `ix_M_STAFFINFO_ADRESS2` (`ADRESS2`),
+  ADD KEY `ix_M_STAFFINFO_TEL1` (`TEL1`),
+  ADD KEY `ix_M_STAFFINFO_TEL2` (`TEL2`),
+  ADD KEY `ix_M_STAFFINFO_BIRTHDAY` (`BIRTHDAY`),
+  ADD KEY `ix_M_STAFFINFO_INDAY` (`INDAY`),
+  ADD KEY `ix_M_STAFFINFO_OUTDAY` (`OUTDAY`),
+  ADD KEY `ix_M_STAFFINFO_STANDDAY` (`STANDDAY`),
+  ADD KEY `ix_M_STAFFINFO_SOCIAL_INSURANCE` (`SOCIAL_INSURANCE`),
+  ADD KEY `ix_M_STAFFINFO_EMPLOYMENT_INSURANCE` (`EMPLOYMENT_INSURANCE`),
+  ADD KEY `ix_M_STAFFINFO_REMARK` (`REMARK`),
+  ADD KEY `ix_M_STAFFINFO_STAFFID` (`STAFFID`),
+  ADD KEY `ix_M_STAFFINFO_DEPARTMENT_CODE` (`DEPARTMENT_CODE`),
+  ADD KEY `ix_M_STAFFINFO_POST_CODE` (`POST_CODE`),
+  ADD KEY `ix_M_STAFFINFO_TEAM_CODE` (`TEAM_CODE`),
+  ADD KEY `ix_M_STAFFINFO_JOBTYPE_CODE` (`JOBTYPE_CODE`),
+  ADD KEY `ix_M_STAFFINFO_CONTRACT_CODE` (`CONTRACT_CODE`),
+  ADD KEY `ix_M_STAFFINFO_FNAME` (`FNAME`),
+  ADD KEY `ix_M_STAFFINFO_LNAME` (`LNAME`),
+  ADD KEY `EXPERIENCE` (`EXPERIENCE`),
+  ADD KEY `TABLET` (`TABLET`),
+  ADD KEY `SINGLE` (`SINGLE`),
+  ADD KEY `SUPPORT` (`SUPPORT`),
+  ADD KEY `HOUSE` (`HOUSE`),
+  ADD KEY `DISTANCE` (`DISTANCE`);
+
+--
+-- テーブルのインデックス `M_SYSTEMINFO`
+--
+ALTER TABLE `M_SYSTEMINFO`
+  ADD PRIMARY KEY (`STAFFID`),
+  ADD KEY `ix_M_SYSTEMINFO_MAIL` (`MAIL`),
+  ADD KEY `ix_M_SYSTEMINFO_STAFFID` (`STAFFID`),
+  ADD KEY `ix_M_SYSTEMINFO_MICRO_PASS` (`MICRO_PASS`),
+  ADD KEY `ix_M_SYSTEMINFO_MAIL_PASS` (`MAIL_PASS`),
+  ADD KEY `ix_M_SYSTEMINFO_PAY_PASS` (`PAY_PASS`),
+  ADD KEY `ix_M_SYSTEMINFO_KANAMIC_PASS` (`KANAMIC_PASS`),
+  ADD KEY `ix_M_SYSTEMINFO_ZOOM_PASS` (`ZOOM_PASS`);
+
+--
+-- テーブルのインデックス `M_TEAM`
+--
+ALTER TABLE `M_TEAM`
+  ADD PRIMARY KEY (`CODE`),
+  ADD KEY `ix_M_TEAM_CODE` (`CODE`),
+  ADD KEY `ix_M_TEAM_NAME` (`NAME`),
+  ADD KEY `ix_M_TEAM_SHORTNAME` (`SHORTNAME`);
+
+--
+-- テーブルのインデックス `M_TIMECARD_TEMPLATE`
+--
+ALTER TABLE `M_TIMECARD_TEMPLATE`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `JOBTYPE_CODE` (`JOBTYPE_CODE`),
+  ADD KEY `CONTACT_CODE` (`CONTACT_CODE`),
+  ADD KEY `TEMPLATE_NO` (`TEMPLATE_NO`);
+
+--
+-- ダンプしたテーブルの AUTO_INCREMENT
+--
+
+--
+-- テーブルの AUTO_INCREMENT `D_NOTIFICATION_LIST`
+--
+ALTER TABLE `D_NOTIFICATION_LIST`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+
+--
+-- テーブルの AUTO_INCREMENT `M_APPROVAL`
+--
+ALTER TABLE `M_APPROVAL`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- テーブルの AUTO_INCREMENT `M_ATTENDANCE`
+--
+ALTER TABLE `M_ATTENDANCE`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33057;
+
+--
+-- テーブルの AUTO_INCREMENT `M_CONTRACT`
+--
+ALTER TABLE `M_CONTRACT`
+  MODIFY `CONTRACT_CODE` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- テーブルの AUTO_INCREMENT `M_DEPARTMENT`
+--
+ALTER TABLE `M_DEPARTMENT`
+  MODIFY `CODE` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- テーブルの AUTO_INCREMENT `M_JOBTYPE`
+--
+ALTER TABLE `M_JOBTYPE`
+  MODIFY `JOBTYPE_CODE` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- テーブルの AUTO_INCREMENT `M_LOGGININFO`
+--
+ALTER TABLE `M_LOGGININFO`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=183;
+
+--
+-- テーブルの AUTO_INCREMENT `M_NOTIFICATION`
+--
+ALTER TABLE `M_NOTIFICATION`
+  MODIFY `CODE` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- テーブルの AUTO_INCREMENT `M_POST`
+--
+ALTER TABLE `M_POST`
+  MODIFY `CODE` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- テーブルの AUTO_INCREMENT `M_STAFFINFO`
+--
+ALTER TABLE `M_STAFFINFO`
+  MODIFY `STAFFID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10001;
+
+--
+-- テーブルの AUTO_INCREMENT `M_TEAM`
+--
+ALTER TABLE `M_TEAM`
+  MODIFY `CODE` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- テーブルの AUTO_INCREMENT `M_TIMECARD_TEMPLATE`
+--
+ALTER TABLE `M_TIMECARD_TEMPLATE`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- ダンプしたテーブルの制約
+--
+
+--
+-- テーブルの制約 `D_COUNTER_FOR_TABLE`
+--
+ALTER TABLE `D_COUNTER_FOR_TABLE`
+  ADD CONSTRAINT `D_COUNTER_FOR_TABLE_ibfk_1` FOREIGN KEY (`STAFFID`) REFERENCES `M_STAFFINFO` (`STAFFID`);
+
+--
+-- テーブルの制約 `D_COUNT_ATTENDANCE`
+--
+ALTER TABLE `D_COUNT_ATTENDANCE`
+  ADD CONSTRAINT `D_COUNT_ATTENDANCE_ibfk_1` FOREIGN KEY (`STAFFID`) REFERENCES `M_STAFFINFO` (`STAFFID`);
+
+--
+-- テーブルの制約 `D_JOB_HISTORY`
+--
+ALTER TABLE `D_JOB_HISTORY`
+  ADD CONSTRAINT `FK_D_JOB_HISTORY_M_TIMECARD_TEMPLATE` FOREIGN KEY (`JOBTYPE_CODE`) REFERENCES `M_TIMECARD_TEMPLATE` (`JOBTYPE_CODE`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_D_JOB_HISTORY_M_TIMECARD_TEMPLATE_2` FOREIGN KEY (`CONTACT_CODE`) REFERENCES `M_TIMECARD_TEMPLATE` (`CONTACT_CODE`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- テーブルの制約 `D_TIME_ATTENDANCE`
+--
+ALTER TABLE `D_TIME_ATTENDANCE`
+  ADD CONSTRAINT `D_TIME_ATTENDANCE_ibfk_1` FOREIGN KEY (`STAFFID`) REFERENCES `M_STAFFINFO` (`STAFFID`);
+
+--
+-- テーブルの制約 `M_ATTENDANCE`
+--
+ALTER TABLE `M_ATTENDANCE`
+  ADD CONSTRAINT `M_ATTENDANCE_ibfk_1` FOREIGN KEY (`STAFFID`) REFERENCES `M_LOGGININFO` (`STAFFID`);
+
+--
+-- テーブルの制約 `M_LOGGININFO`
+--
+ALTER TABLE `M_LOGGININFO`
+  ADD CONSTRAINT `M_LOGGININFO_ibfk_1` FOREIGN KEY (`STAFFID`) REFERENCES `M_STAFFINFO` (`STAFFID`);
+
+--
+-- テーブルの制約 `M_RECORD_PAIDHOLIDAY`
+--
+ALTER TABLE `M_RECORD_PAIDHOLIDAY`
+  ADD CONSTRAINT `M_RECORD_PAIDHOLIDAY_ibfk_1` FOREIGN KEY (`STAFFID`) REFERENCES `M_STAFFINFO` (`STAFFID`);
+
+--
+-- テーブルの制約 `M_SYSTEMINFO`
+--
+ALTER TABLE `M_SYSTEMINFO`
+  ADD CONSTRAINT `M_SYSTEMINFO_ibfk_1` FOREIGN KEY (`STAFFID`) REFERENCES `M_STAFFINFO` (`STAFFID`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

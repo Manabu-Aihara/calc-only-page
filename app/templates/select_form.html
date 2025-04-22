@@ -8,6 +8,7 @@
 <body>
     <p>現在{{ name }}さんが利用中です</p>
     <form method="post" action="collect-members-html">
+        <p>所属No.を選択してください</p>
         <select name="team_number">
             {% for team_num in team_nums %}
             <option value="{{ team_num.CODE }}">{{ team_num.CODE }}</option>
